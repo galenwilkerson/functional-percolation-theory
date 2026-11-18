@@ -66,6 +66,9 @@ def fig_fss():
         gp = g[g.k * g.S < 0.3]                      # expansion valid for k x_max << 1
         ax[0].plot(gp.lam_s, gp.psi_pred * N ** (2 / 3) / 5, "-", color=COL[i], lw=0.9)
         ax[1].plot(g.lam_s, g.chiN_sc, MK[i], ms=3.5, color=COL[i], label=nlab(N))
+        al = pd.read_csv(D / "aldous/aldous_vs_e1w.csv")
+        al = al[(al.N == N) & (al.k == 5) & (al.lam.abs() <= 3.01)].sort_values("lam")
+        ax[0].plot(al.lam, al.psi_pred * N ** (2 / 3) / 5, "--", color=COL[i], lw=0.8)
     L = np.linspace(0.5, 3, 50)
     ax[1].plot(L, 4 * L ** 2, "--", color="#52514e", lw=0.9, label=r"$4\lambda^2$")
     L = np.linspace(-3, -0.5, 50)
@@ -75,7 +78,7 @@ def fig_fss():
         a.set_xlabel(r"$\lambda=(z-1)N^{1/3}$")
     ax[0].set_ylabel(r"$\Psi_N N^{2/3}/k$")
     ax[1].set_ylabel(r"$g(\lambda)=\bar s_N/N^{1/3}$")
-    panel(ax[0], "(a) points: measured; lines: same-graph prediction")
+    panel(ax[0], "(a) points: measured; solid: same-graph; dashed: Aldous")
     panel(ax[1], "(b) structural mean cluster size")
     ax[0].legend(fontsize=7)
     ax[1].legend(fontsize=7, ncol=2)
@@ -145,14 +148,17 @@ def fig_growing_k():
     s = pd.read_csv(D / "growing_k/summary.csv")
     s = s[s.z > 1]
     fig, ax = plt.subplots(1, 2, figsize=(7.0, 2.8))
-    kinds = ["a0.25", "a0.5", "a0.75", "h0.05"]
-    labs = [r"$k=N^{1/4}$", r"$k=N^{1/2}$", r"$k=N^{3/4}$", r"$k=0.05N$"]
+    kinds = ["a0.25", "a0.5", "a0.75", "h0.01", "h0.05"]
+    labs = [r"$k=N^{1/4}$", r"$k=N^{1/2}$", r"$k=N^{3/4}$", r"$k=0.01N$", r"$k=0.05N$"]
+    cols = COL + ["#52514e"]
+    mks = MK + ["v"]
     for i, (kn, lb) in enumerate(zip(kinds, labs)):
         g = t[t.kname == kn]
-        ax[0].errorbar(g.pred, g.C, yerr=g.C_se, fmt=MK[i], ms=3.5, color=COL[i], lw=0.8, label=lb)
+        ax[0].errorbar(g.pred, g.C, yerr=g.C_se, fmt=mks[i], ms=3.5, color=cols[i], lw=0.8, label=lb)
         g = s[s.kname == kn]
-        ax[1].plot(g.P_pred, g.m_on_mean, MK[i], ms=4, color=COL[i], label=lb)
-        ax[1].plot(g.q_pred, g.q_emp, MK[i], ms=4, mfc="none", color=COL[i])
+        if len(g):
+            ax[1].plot(g.P_pred, g.m_on_mean, mks[i], ms=4, color=cols[i], label=lb)
+            ax[1].plot(g.q_pred, g.q_emp, mks[i], ms=4, mfc="none", color=cols[i])
     x = np.geomspace(1e-5, 1, 10)
     ax[0].plot(x, x, "-", color="#52514e", lw=0.8)
     ax[0].set_xscale("log")
@@ -183,7 +189,7 @@ def fig_selection():
         ax[1].plot(g.z, g.A_p, "-", color=COL[i], lw=0.8)
     for a in ax:
         a.set_xlabel("$z$")
-    ax[0].set_ylabel(r"$\Lambda/k$")
+    ax[0].set_ylabel(r"$C_N/k$")
     ax[1].set_ylabel(r"anisotropy $A=\mathrm{Var}_i\,m_i$")
     panel(ax[0], r"(a) lines: $S\,S_{\rm in}$ ($k=5$, $N=10^6$)")
     panel(ax[1], r"(b) lines: $S^2S_{\rm in}(1-S_{\rm in})(1-1/k)$")
@@ -272,23 +278,24 @@ def fig_symmetry():
 
 
 def fig_kS():
-    """§6.4: Psi/S = 1-(1-S)^k across six decades of kS."""
+    """§6.4: Psi/S = 1-(1-S)^k = 1-exp(-x), x = -k ln(1-S)."""
     b = pd.read_csv(D / "extra/B_kS_crossover.csv", dtype={"phi": str})
     b = b[b.phi.isin(["0.05", "0.1"]) & (b.kS > 0)]
     fig, ax = plt.subplots(figsize=(3.5, 2.6))
     for i, src in enumerate(sorted(b.src.unique())):
         g = b[b.src == src]
-        ax.loglog(g.kS, g.psi / g.S, MK[i], ms=2.5, color=COL[i], alpha=0.6, label=src)
-    x = np.geomspace(1e-3, 1e3, 200)
-    ax.loglog(x, 1 - np.exp(-x), "-", color="#52514e", lw=1.0, label=r"$1-e^{-kS}$")
-    ax.set_xlabel(r"$kS$")
+        lab = {"E1-C": "coarse map", "E1-W": "critical window", "probe": "probe"}[src]
+        ax.loglog(-g.k * np.log1p(-g.S), g.psi / g.S, MK[i], ms=2.5, color=COL[i], alpha=0.6, label=lab)
+    x = np.geomspace(1e-3, 1e4, 200)
+    ax.loglog(x, 1 - np.exp(-x), "-", color="#52514e", lw=1.0, label=r"$1-e^{-y}$")
+    ax.set_xlabel(r"$y=-k\ln(1-S)$")
     ax.set_ylabel(r"$\Psi/S$")
     ax.legend(fontsize=6.5)
     fig.tight_layout()
     fig.savefig(OUT / "fig_kS.pdf")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and not os.environ.get("PAPER"):
     fig_order()
     fig_symmetry()
     fig_kS()
@@ -310,7 +317,7 @@ def fig_field_v3():
     g = f[f.N == 1000000]
     zz = np.linspace(0.5, 1.45, 300)
     S = np.array([giant_fraction(z) for z in zz])
-    ax[0].plot(zz, S, "-", color=INK, lw=1.0, label="$S$")
+    ax[0].plot(zz, S, "--", color=INK, lw=1.1, label="$S$", zorder=5)
     for i, (law, par, lab) in enumerate([("rho", 0.01, "$h=10^{-2}$"), ("rho", 0.001, "$h=10^{-3}$"),
                                          ("fixed", 5.0, "$k=5$"), ("fixed", 1.0, "$k=1$")]):
         t = g[(g.law == law) & (g.par == par)].sort_values("z")
@@ -328,7 +335,10 @@ def fig_field_v3():
     # (b) linear response below z_c
     for i, N in enumerate(NS):
         t = f[(f.N == N) & (f.z < 0.99) & (f.law == "rho")]
-        ax[1].loglog(t.z / (1 - t.z), t["mean"] / t.h, MK[i], ms=2.6, color=COL[i], label=nlab(N))
+        for hv, fill in ((1e-3, COL[i]), (1e-2, "none")):
+            u = t[np.isclose(t.h, hv)]
+            ax[1].loglog(u.z / (1 - u.z), u["mean"] / u.h, MK[i], ms=2.6, color=COL[i], mfc=fill,
+                         label=nlab(N) if hv == 1e-3 else None)
     x = np.geomspace(0.9, 120, 20)
     ax[1].loglog(x, x, "-", color=INK, lw=0.8)
     ax[1].set_xlabel(r"$z/(1-z)$")
@@ -339,7 +349,10 @@ def fig_field_v3():
         t = f[(f.N == N) & (abs(f.z - 1) < 1e-9)]
         ax[2].loglog(t.h, t["mean"], MK[i], ms=2.6, color=COL[i])
     hh = np.geomspace(1e-6, 1e-1, 20)
-    ax[2].loglog(hh, np.sqrt(2 * hh), "-", color=INK, lw=0.8, label=r"$\sqrt{2h}$")
+    from scipy.optimize import brentq
+    iso = [1 - np.exp(-brentq(lambda P: P - 1 + (1 - x) * np.exp(-P), 1e-12, 1)) for x in hh]
+    ax[2].loglog(hh, iso, "-", color=INK, lw=0.8, label="Eq. (3)")
+    ax[2].loglog(hh, np.sqrt(2 * hh), "--", color=INK, lw=0.7, label=r"$\sqrt{2h}$")
     ax[2].set_xlabel("$h=k/N$")
     ax[2].set_ylabel(r"$\Psi(z=1)$")
     ax[2].legend(fontsize=5.5)
@@ -676,8 +689,15 @@ def fig_phase_onset_v6():
         for i, N in enumerate(NS):
             t = t0[t0.N == N].sort_values("z")
             a.plot(t.z, t.psi, MK[i], ms=2.2, color=COL[i], label=nlab(N))
-        zz = np.linspace(1.0, 1.5, 100)
-        a.plot(zz, [giant_fraction(z) for z in zz], "-", color="#52514e", lw=0.7, label="$S$")
+        if ph == "0.1":
+            zz = np.linspace(1.0, 1.5, 100)
+            Sz = np.array([giant_fraction(z) for z in zz])
+            a.plot(zz, Sz * (1 - (1 - Sz) ** 5), "-", color="#52514e", lw=0.7, label="$S[1-(1-S)^5]$")
+        else:
+            import watts
+            zz = np.linspace(1.1145, 1.5, 60)
+            pr = [watts.predict(z, 0.25, 5)["psi_w"] for z in zz]
+            a.plot(zz, pr, "-", color="#52514e", lw=0.7, label="$S_c[1-(1-P_t)^5]$")
         a.axvline(zl, color=INK, lw=0.6)
         a.set_xlabel("$z$")
         a.set_ylabel(r"$\Psi$")
@@ -1105,7 +1125,7 @@ def fig_schematic3_v9(fname="fig_schematic3.pdf"):
     ax2.set_xlim(ZMIN, ZMAX)
     ax2.set_ylim(0, 0.95)
     ax2.set_xlabel("mean degree $z$", fontsize=7.5)
-    ax2.set_ylabel("fraction computing\nthe giant's OR", fontsize=7)
+    ax2.set_ylabel("fraction computing the\nlargest responsive\ncluster's OR", fontsize=7)
     ax2.legend(fontsize=6, frameon=False, loc="center right")
     panel(ax2, "(d)")
     fig.savefig(OUT / fname, bbox_inches="tight")
@@ -1114,3 +1134,13 @@ def fig_schematic3_v9(fname="fig_schematic3.pdf"):
 if __name__ == "__main__" and os.environ.get("V9THREE"):
     fig_schematic3_v9()
     print("three ok")
+
+# ---------------------------------------------------------------- the figures of the paper
+PAPER_FIGURES = ["fig_schematic3_v9", "fig_field_v3", "fig_fss", "fig_composites3_v7", "fig_kS",
+                 "fig_growing_k", "fig_phase_onset_v6", "fig_info_si_v9", "fig_lattice_v4", "fig_finiteh_v6",
+                 "fig_symmetry", "fig_selection", "fig_dtc_v4", "fig_fluct"]
+
+if __name__ == "__main__" and os.environ.get("PAPER"):
+    for name in PAPER_FIGURES:      # plus fig_synergy.py (separate script)
+        globals()[name]()
+    print("paper figures ok")

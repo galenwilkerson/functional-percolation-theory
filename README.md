@@ -28,10 +28,13 @@ The figures and the CPU scripts run on any machine. The random-graph truth-table
 ## Regenerate the figures
 
 ```
-V3=1 V4=1 V5=1 V6=1 V7=1 V9=1 FIG_OUT=figures python code/paper_figures.py
+PAPER=1 FIG_OUT=figures python code/paper_figures.py
+FIG_OUT=figures python code/fig_synergy.py
 ```
 
-This reads `summaries/` (override with `FP_DATA=<dir>`) and takes about a minute on a CPU.
+This makes exactly the 15 figures of the paper from `summaries/` (override with `FP_DATA=<dir>`) in about a
+minute on a CPU. Each figure can also be made on its own by calling its function (table below); the other
+`V*` flags in `paper_figures.py` regenerate earlier drafts' figures and are not needed.
 
 | Figure | Function in `paper_figures.py` | Summary table | Produced by |
 |---|---|---|---|
@@ -39,8 +42,9 @@ This reads `summaries/` (override with `FP_DATA=<dir>`) and takes about a minute
 | Fig. 2 (equation of state) | `fig_field_v3` | `e2f/analysis/field_summary.csv` | `field.py`, `analyze_field.py` (GPU) |
 | SM: functional observables | `fig_composites3_v7` | `e1c/analysis/cells_summary.csv`, `e1w/analysis/window_summary.csv` | `sweep.py` with `grid.py`, then `analyze.py`, `analyze_window.py` (GPU) |
 | SM: 2D lattice | `fig_lattice_v4` | `lattice2d/summary.csv` | `lattice2d.py` (CPU) |
-| SM: finite-size scaling | `fig_fss_v3` | `extra/O_psi_window.csv` | `open_items.py`; Aldous prediction `aldous.py` |
+| SM: finite-size scaling | `fig_fss` | `extra/O_psi_window.csv`, `aldous/aldous_vs_e1w.csv` | `open_items.py`; Aldous prediction `aldous.py` (and `aldous.py --analyze`) |
 | SM: crossover in $kS$ | `fig_kS` | `extra/B_kS_crossover.csv` | `analyze_extra.py` |
+| SM: synergy at finite input density | `fig_synergy.py` | `individual/FIXHI.csv`, `synergy_theory/synergy_theory.csv` | `individual_inputs.py --stage FIXHI` (CPU; exact classification with $k+\#\{R_u\}$ cascades), `synergy_theory.py` (tree recursion) |
 | SM: growing $k$ | `fig_growing_k` | `growing_k/` | `growing_k.py` (CPU) |
 | SM: phase map and onsets | `fig_phase_onset_v6` | e1c and e1w summaries | as above |
 | SM: finite input density | `fig_finiteh_v6` | `finite_h/summary.csv`, `lattice_h/summary.csv` | `finite_h.py`, `lattice_h.py` (CPU) |
@@ -48,7 +52,8 @@ This reads `summaries/` (override with `FP_DATA=<dir>`) and takes about a minute
 | Further SM figures | `fig_symmetry`, `fig_selection`, `fig_fluct`, `fig_dtc_v4` | `e3/`, `input_selection/`, `extra/` | `e3.py`, `input_selection.py`, `analyze_extra.py` |
 
 Theory checks: `verify_theory.py`, `watts.py` (vulnerable-cluster quantities), `open_items.py`,
-`open_items2.py`, `er_checks.py`, `class_dilution.py` (exact class construction for large $k$).
+`open_items2.py`, `er_checks.py`, `class_dilution.py` (exact class construction for large $k$),
+`exact_cluster_size.py` (exact finite-$N$ mean cluster size, for the finite-size-scaling check).
 `lattice_info.py` (2D information runs) is kept for completeness; its results are not used in the paper.
 
 ## Rerunning the simulations
