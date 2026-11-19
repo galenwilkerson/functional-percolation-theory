@@ -195,20 +195,28 @@ def draw_graph(ax, G, inputs, mc, title, notes=(), ring=(), sym=None):
     nx.draw_networkx_edges(H, pos, edgelist=eg, ax=ax, width=0.9, edge_color=C_GCC)
     others = [u for u in H if u not in inputs]
     small = [u for u in others if mc[u] != "non"]
-    nx.draw_networkx_nodes(H, pos, nodelist=small, node_color=[FILL[mc[u]] for u in small], node_size=18,
+    nx.draw_networkx_nodes(H, pos, nodelist=small, node_color=[FILL[mc[u]] for u in small], node_size=30,
                            linewidths=0.5, edgecolors=INK, ax=ax)
     non = [u for u in others if mc[u] == "non"]
-    nx.draw_networkx_nodes(H, pos, nodelist=non, node_color=C_NON, node_size=36, linewidths=0.5,
+    nx.draw_networkx_nodes(H, pos, nodelist=non, node_color=C_NON, node_size=52, linewidths=0.5,
                            edgecolors=INK, ax=ax)
     if ring:
-        nx.draw_networkx_nodes(H, pos, nodelist=list(ring), node_color="none", node_shape="s", node_size=150,
+        nx.draw_networkx_nodes(H, pos, nodelist=list(ring), node_color="none", node_shape="s", node_size=190,
                                edgecolors=C_RING, linewidths=1.8, ax=ax)
-    nx.draw_networkx_nodes(H, pos, nodelist=inputs, node_color=INK, node_shape="s", node_size=40, ax=ax)
+    nx.draw_networkx_nodes(H, pos, nodelist=inputs, node_color=INK, node_shape="s", node_size=55, ax=ax)
     if sym:
         ax.text(0.0, -0.02, sym, transform=ax.transAxes, fontsize=7.4, color=INK, ha="left", va="top")
     for lab, u in zip("ABC", inputs):
         x, y = pos[u]
-        ax.text(x, y + 0.05, lab, ha="center", va="bottom", fontsize=9, fontweight="bold", color=INK)
+        others_xy = np.array([pos[v] for v in H if v != u])
+        best, bd = None, -1
+        for dx, dy in ((0, .13), (0, -.13), (.12, 0), (-.12, 0), (.1, .1), (-.1, .1), (.1, -.1),
+                       (-.1, -.1)):
+            d = np.min(np.hypot(others_xy[:, 0] - (x + dx), others_xy[:, 1] - (y + dy)))
+            if d > bd:
+                best, bd = (dx, dy), d
+        ax.text(x + best[0], y + best[1], lab, ha="center", va="center", fontsize=9, fontweight="bold", color=INK,
+                bbox=dict(boxstyle="round,pad=0.12", fc="white", ec="none", alpha=0.9), zorder=7)
     for u, txt, dx, dy in notes:
         x, y = pos[u]
         ax.annotate(txt, (x, y), xytext=(x + dx, y + dy), fontsize=6.5, color=INK, ha="center",
@@ -227,23 +235,26 @@ def _S(z):
 def main():
     from matplotlib.lines import Line2D
     Z = 2.2
-    G, inputs, cls_b, gcc, seed = find_example(z=Z)
+    G, inputs, _, gcc, seed = find_example(N=50, z=Z, tries=20000)
+    inputs = inputs[:2]                       # A (triggers) and B (connected, does not trigger)
+    pats, fb = functions(G, inputs, phi=PHI)
+    cls_b = {u: classify(t, pats) for u, t in fb.items()}
     pats, fa = functions(G, inputs, phi=0.1)
     assert max(dict(G.degree).values()) <= 10
     cls_a = {u: classify(t, pats) for u, t in fa.items()}
     mc_a, mc_b = by_inputs(cls_a), by_inputs(cls_b)
 
-    fig = plt.figure(figsize=(7.0, 5.2))
-    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.42, 1.0], hspace=0.42, wspace=0.12)
+    fig = plt.figure(figsize=(7.0, 5.0))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.3, 1.0], hspace=0.42, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
     draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nevery connected node responds to $A$ or $B$",
                ring=inputs[:2],
-               sym="ringed: inputs that control the giant cascade ($A$, $B$)\n"
-                   "symmetry left: swapping $A\\leftrightarrow B$ only")
+               sym="ringed: $A$ and $B$ both control the giant cascade\n"
+                   "swapping $A\\leftrightarrow B$ changes nothing: symmetric")
     draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nonly $A$ controls; $B$ is connected but inert",
                ring=inputs[:1],
-               sym="ringed: $A$ only\nsymmetry left: swapping $B\\leftrightarrow C$ only",
-               notes=[(inputs[1], "$B$: connected, but\nswitches nothing on", 0.16, -0.24)])
+               sym="ringed: only $A$ controls the giant cascade\n"
+                   "swapping $A\\leftrightarrow B$ changes the function: broken")
 
     def key(ax, items):
         ax.set_axis_off()
@@ -259,14 +270,12 @@ def main():
                   columnspacing=0.7, borderaxespad=0, handlelength=1.2)
     key(fig.add_subplot(gs[1, 0]), [
         ("node", C_AB, r"responds to $A$ or $B$ ($x_A\vee x_B$)"),
-        ("node", C_FIN, r"responds to $C$ only"),
         ("node", C_ZERO, "never responds"),
         ("input", INK, "input"),
         ("edge", C_GCC, "giant component")])
     key(fig.add_subplot(gs[1, 1]), [
         ("node", C_OR, r"responds to $A$ only ($x_A$)"),
         ("node", C_NON, r"needs $A$ and $B$ ($x_A\wedge x_B$)"),
-        ("node", C_FIN, r"responds to $C$ only"),
         ("node", C_ZERO, "never responds")])
 
     c = fig.add_subplot(gs[2, :])
@@ -280,8 +289,6 @@ def main():
            label=r"connected: input in the giant component ($S$); in simple contagion also controlling")
     c.plot(zz, [watts.trigger_prob(z, PHI) for z in zz], "-", color=C_OR, lw=1.5,
            label=r"controlling: input triggers a global cascade at $\varphi=0.25$ ($P_t$)")
-    c.plot(g.index, g.qc, "o", color=C_GCC, ms=3.5, mfc="white")
-    c.plot(g.index, g.qf, "s", color=C_OR, ms=3.5)
     for zv in (1.0, 1.114):
         c.axvline(zv, color=MUTED, lw=0.9, ls=":")
     c.text(0.98, 1.03, "$z_c$", ha="right", fontsize=8, color=MUTED)
