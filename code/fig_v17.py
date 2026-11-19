@@ -44,7 +44,7 @@ def p_traj(ax, t):
         zj = float(g.z[g[f"m{j}"] > 0.5].min())
         ax.text(zj + 0.08, 0.33 - 0.13 * (j % 2), f"input {j}", color=COL[j], fontsize=8, ha="left", va="center")
     ax.text(0.95, 0.42, "giant\ncomponent", color=INK, fontsize=8, ha="right", va="center")
-    panel(ax, r"(a) one network, $\varphi=0.1$")
+    panel(ax, r"(a) a growing network commits to inputs ($\varphi=0.1$)")
 
 
 def p_atoms(ax, s):
@@ -60,7 +60,7 @@ def p_atoms(ax, s):
     ax.set_xlabel("$M_0=m_0-\\bar m$")
     ax.set_ylabel("$P(M_0)$")
     ax.legend(fontsize=7.6, loc="upper center", ncol=3, columnspacing=0.8, handlelength=1.2, borderaxespad=0.2)
-    panel(ax, r"(b) broken states, $z=1.5$")
+    panel(ax, r"(b) broken states are sharp atoms ($z=1.5$)")
 
 
 def p_func_conn(ax, s):

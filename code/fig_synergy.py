@@ -63,7 +63,7 @@ def main():
     ax[0].axvline(zc, color="#52514e", lw=0.8)
     ax[0].set_xlabel("$z$")
     ax[0].set_ylabel("pure-synergy share")
-    ax[0].set_title(r"(a) it peaks at the onset $z_{\rm lo}$", loc="left", fontsize=9)
+    ax[0].set_title(r"(a) it peaks near the onset $z_{\rm lo}$", loc="left", fontsize=9)
     ax[0].legend(fontsize=7.5, loc="upper right")
     hs = np.logspace(-7, -2, 21)
     for i, (lab, z) in enumerate(((r"$z=z_{\rm lo}$", zc), ("$z=1.05$", 1.05), ("$z=0.9$", 0.9))):
