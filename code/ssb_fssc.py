@@ -72,7 +72,7 @@ def run(out, smoke):
 
 def analyze():
     import ssb_fss_analyze as sa
-    data = Path(os.environ.get("SSB_DATA", HERE.parent / "data" / "ssb"))
+    data = Path(os.environ.get("SSB_DATA", HERE / "data/ssb"))
     out = Path(os.environ.get("SSB_OUT", HERE.parent / "summaries" / "ssb"))
     pfx = os.environ.get("SSB_PREFIX", "")
     df = pd.read_parquet(data / f"{pfx}fssc.parquet")
@@ -109,7 +109,7 @@ def analyze():
             ax.plot(c.lam, c[obs] * N ** a0, "o-", ms=2, lw=0.8, label=f"N=$10^{{{int(np.log10(N))}}}$")
         ax.plot(al.lam, th(al.G2.values, al.G3.values), "k:", lw=1.2, label="Aldous (no fit)")
         ax.set_yscale("log")
-        ax.set_xlabel(r"$\lambda=(z-1)N^{1/3}$")
+        ax.set_xlabel(r"$t=(z-1)N^{1/3}$")
         ax.set_ylabel(lab)
     axs[0].legend(fontsize=7.6)
     fig.suptitle("SC-c: cluster-exact placement averages, simple contagion, $k=3$; approach to the Aldous limit",

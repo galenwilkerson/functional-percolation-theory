@@ -37,7 +37,7 @@ def p_traj(ax, t):
     for j in range(3):
         ax.plot(g.z, g[f"m{j}"], color=COL[j], marker=MK[j], ms=2.2, lw=1.1, label=f"input {j}")
     ax.plot(g.z, g.gcc, color=INK, ls=":", lw=0.9, label="giant component")
-    ax.set_xlabel("$z$ (edges added)")
+    ax.set_xlabel("mean degree $z$ (growing network)")
     ax.set_ylabel("relevance $m_i$")
     # direct labels next to each input's jump (no legend: the jumps cross any legend position)
     for j in range(3):
@@ -132,7 +132,7 @@ def p_fss(ax, lab):
         ax.plot(d.lam, d.absM0 * N ** (2 / 3), "-" + MK[i], color=COL[i], ms=2.5, label=nlab(N))
     ax.plot(al.lam, 2 * (1 - 1 / 3) * al.G2, color=INK, ls=":", lw=1.2, label="Aldous limit")
     ax.set_yscale("log")
-    ax.set_xlabel("$\\lambda_N=(z-1)N^{1/3}$")
+    ax.set_xlabel("$t_N=(z-1)N^{1/3}$")
     ax.set_ylabel("$\\langle|M_0|\\rangle N^{2/3}$")
     ax.legend(fontsize=7.6)
     panel(ax, lab)
@@ -185,7 +185,7 @@ def fig_ssb3():
     h, _ = axs[2].get_legend_handles_labels()
     axs[2].legend(h, [r"controlling, $\varphi=0.25$", r"connected, $\varphi=0.25$", r"$\varphi=0.1$ (both)"],
                   fontsize=7.4, loc="upper right", borderaxespad=0.1, labelspacing=0.15, handlelength=1.2)
-    axs[2].set_ylabel("broken networks, $k=3$")
+    axs[2].set_ylabel("fraction broken, $k=3$")
     fig.tight_layout(w_pad=0.8)
     fig.savefig(OUT / "fig_ssb3.pdf", bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)

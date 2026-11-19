@@ -58,13 +58,16 @@ def main():
         z, m, e = np.array(rows).T
         ax[0].errorbar(z, m, yerr=e, fmt=MK[i], ms=3.2, lw=0.7, color=COL[i])
     t = th[th.h == 1e-6]
-    ax[0].plot(t.z, t.pure, "--", color="#52514e", lw=0.8, label=r"$h=10^{-6}$ (theory)")
+    ax[0].plot(t.z, t.pure, "--", color="#52514e", lw=1.5, label=r"$h=10^{-6}$ (theory)")
     ax[0].plot([zc], [pc], "*", ms=8, color=INK, label=r"$1-\sqrt{1-\kappa}$")
     ax[0].axvline(zc, color="#52514e", lw=0.8)
     ax[0].set_xlabel("$z$")
     ax[0].set_ylabel("pure-synergy share")
     ax[0].set_title(r"(a) it peaks near the onset $z_{\rm lo}$", loc="left", fontsize=9)
-    ax[0].legend(fontsize=7.5, loc="upper right")
+    from matplotlib.lines import Line2D
+    hh, ll = ax[0].get_legend_handles_labels()
+    hh.append(Line2D([], [], ls="", marker="o", color="#52514e", ms=3.5)); ll.append("simulation (points)")
+    ax[0].legend(hh, ll, fontsize=7.5, loc="upper right")
     hs = np.logspace(-7, -2, 21)
     for i, (lab, z) in enumerate(((r"$z=z_{\rm lo}$", zc), ("$z=1.05$", 1.05), ("$z=0.9$", 0.9))):
         v = []

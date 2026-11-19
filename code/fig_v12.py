@@ -46,7 +46,10 @@ def panel(ax, t):
 
 def nlab(N):
     e = math.log10(N)
-    return f"$N=10^{int(round(e))}$" if abs(e - round(e)) < 1e-9 else f"$N={N:,}$".replace(",", "{,}")
+    if abs(e - round(e)) < 1e-9:
+        return f"$N=10^{int(round(e))}$"
+    p = int(math.floor(e))
+    return f"$N={N / 10**p:g}\\times10^{p}$"
 
 
 def z_hi_n(n):
@@ -83,7 +86,7 @@ def fig_phase_diagram():
     # zoom: the strip between z_c and z_lo, with the two data points
     axs[1].text(1.122, 0.24, "$n=4$: $z_{\\rm lo}=1.114$", fontsize=8)
     axs[1].text(1.03, 0.183, "$n=5$: $z_{\\rm lo}=1.021$", fontsize=8)
-    axs[1].text(1.03, 0.093, "$n=10$: $z_{\\rm lo}=1.000$", fontsize=8)
+    axs[1].text(1.03, 0.093, "$n=10$: $z_{\\rm lo}=1+10^{-6}$", fontsize=8)
     axs[1].text(1.057, 0.226, "connected,\nno function", fontsize=7.6, color="#a8441a", ha="center", va="bottom")
     g = pd.read_csv(RES / "g_finiteh.csv")
     for (z, ok) in ((1.05, False), (1.2, True)):

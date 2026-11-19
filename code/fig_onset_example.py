@@ -311,9 +311,9 @@ def main():
     c.tick_params(labelsize=8)
     for sp in ("top", "right"):
         c.spines[sp].set_visible(False)
-    c.text(1.3, 1.26, "connected: in the giant\ncomponent, $S$ (= controlling\nin simple contagion)",
+    c.text(1.3, 1.26, "connected ($S$)\n= controlling in\nsimple contagion",
            fontsize=7.6, color=C_GCC, ha="left", va="top")
-    c.text(2.3, 0.45, "controlling: input triggers\na global cascade at\n$\\varphi=0.25$, $P_t$", fontsize=7.6,
+    c.text(2.3, 0.45, "controlling\n($P_t$, $\\varphi=0.25$)", fontsize=7.6,
            color=C_OR, ha="left", va="top")
 
     OUT.mkdir(parents=True, exist_ok=True)
