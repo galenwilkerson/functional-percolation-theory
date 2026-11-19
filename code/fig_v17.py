@@ -35,14 +35,14 @@ def p_traj(ax, t):
     g0 = t[(t.k == 3) & (t.phi == 0.1) & (t.N == 64000)]
     g = g0[g0.seed == sorted(g0.seed.unique())[0]].sort_values("z")
     for j in range(3):
-        ax.plot(g.z, g[f"m{j}"], color=COL[j], marker=MK[j], ms=2.2, lw=1.1, label=f"input {j + 1}")
+        ax.plot(g.z, g[f"m{j}"], color=COL[j], marker=MK[j], ms=2.2, lw=1.1, label=f"input {j}")
     ax.plot(g.z, g.gcc, color=INK, ls=":", lw=0.9, label="giant component")
     ax.set_xlabel("$z$ (edges added)")
     ax.set_ylabel("relevance $m_i$")
     # direct labels next to each input's jump (no legend: the jumps cross any legend position)
     for j in range(3):
         zj = float(g.z[g[f"m{j}"] > 0.5].min())
-        ax.text(zj + 0.08, 0.33 - 0.13 * (j % 2), f"input {j + 1}", color=COL[j], fontsize=8, ha="left", va="center")
+        ax.text(zj + 0.08, 0.33 - 0.13 * (j % 2), f"input {j}", color=COL[j], fontsize=8, ha="left", va="center")
     ax.text(0.95, 0.42, "giant\ncomponent", color=INK, fontsize=8, ha="right", va="center")
     panel(ax, r"(a) one network, $\varphi=0.1$")
 
@@ -88,6 +88,7 @@ def p_func_conn(ax, s):
     ax.axvline(1.114, color="#52514e", lw=0.6)
     ax.text(1.14, 1.12, r"$z_{\rm lo}$", fontsize=8.5, color="#52514e", va="top")
     ax.set_ylim(0, 1.2)
+    ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     ax.legend(fontsize=7.6, loc="upper right", ncol=1, borderaxespad=0.2)
     panel(ax, r"(c) broken by function, not connectivity")
 
