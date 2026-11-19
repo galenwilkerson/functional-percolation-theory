@@ -247,11 +247,11 @@ def main():
     fig = plt.figure(figsize=(7.0, 5.0))
     gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.26, 1.0], hspace=0.42, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
-    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion, $z={Z}$\nfunction = connectivity",
+    draw_graph(ga, G, inputs, mc_a, f"(i) simple contagion, $z={Z}$\nfunction = connectivity",
                ring=inputs[:2],
                sym="$A$ and $B$ both control the giant cascade (gold boxes)\n"
                    "swapping $A\\leftrightarrow B$ changes nothing: symmetric")
-    draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nconnectivity is not sufficient",
+    draw_graph(gb, G, inputs, mc_b, f"(ii) $\\varphi=0.25$, same graph\nconnectivity is not sufficient",
                ring=inputs[:1],
                sym="only $A$ controls the giant cascade (gold box); $B$ is connected\n"
                    "swapping $A\\leftrightarrow B$ changes the function: broken")
@@ -296,7 +296,7 @@ def main():
     c.text(1.14, 1.03, r"$z_{\rm lo}$", ha="left", fontsize=8, color=MUTED)
     c.axvline(Z, color=INK, lw=0.9, ls="--", zorder=0)
     c.plot([Z, Z], [-0.1, 0], transform=c.get_xaxis_transform(), color=INK, lw=0.9, ls="--", clip_on=False)
-    for yv, lab, col in ((_S(Z), "a", C_GCC), (watts.trigger_prob(Z, PHI), "b", C_OR)):
+    for yv, lab, col in ((_S(Z), "i", C_GCC), (watts.trigger_prob(Z, PHI), "ii", C_OR)):
         c.plot([Z], [yv], "o", ms=9, mfc="white", mec=col, mew=1.3, zorder=5)
         c.text(Z, yv, lab, ha="center", va="center", fontsize=7.5, fontweight="bold", color=col, zorder=6)
     c.text(Z, -0.11, f"$z={Z}$", ha="center", va="top", fontsize=8, color=INK, fontweight="bold",
@@ -306,7 +306,7 @@ def main():
     c.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
     c.set_xlabel("mean degree $z$ (average number of links per node)", fontsize=9, labelpad=14)
     c.set_ylabel("probability that an input is\nconnected / controlling", fontsize=9)
-    c.set_title(r"(c) inputs are connected from $z_c$ on, but control only from $z_{\rm lo}$ on, and not all of them",
+    c.set_title(r"(iii) inputs are connected from $z_c$ on, but control only from $z_{\rm lo}$ on, and not all of them",
                 fontsize=9, loc="left", pad=14)
     c.tick_params(labelsize=8)
     for sp in ("top", "right"):
@@ -318,7 +318,8 @@ def main():
 
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "fig_onset_example.pdf", bbox_inches="tight")
-    fig.savefig(OUT / "fig_onset_example.png", dpi=170, bbox_inches="tight")
+    if os.environ.get("PNG_OUT"):
+        fig.savefig(Path(os.environ["PNG_OUT"]) / "fig_onset_example.png", dpi=170, bbox_inches="tight")
     print("seed", seed, "a:", {k: list(mc_a.values()).count(k) for k in set(mc_a.values())},
           "b:", {k: list(mc_b.values()).count(k) for k in set(mc_b.values())})
 
