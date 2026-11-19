@@ -25,6 +25,7 @@ from scipy.sparse.csgraph import connected_components
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+from spec_card import check_spec, write_with_header  # noqa: E402
 from ssb import adjacency, edge_sequence  # noqa: E402
 
 K = 3
@@ -56,6 +57,7 @@ def run(out, smoke):
     tasks = [(N, lam, 10 ** 13 + 1_000_003 * i + r) for i, (N, lam) in enumerate((N, l) for N in graphs for l in lams)
              for r in range(graphs[N])]
     tasks.sort(key=lambda t: -t[0])
+    check_spec(mode="fssc", phis=sorted({}), graph="er")
     ncpu = int(os.environ.get("GQ_CPUS", os.cpu_count() or 4))
     res = []
     with Pool(ncpu, maxtasksperchild=50) as pool:
@@ -64,7 +66,7 @@ def run(out, smoke):
             if (i + 1) % max(1, len(tasks) // 20) == 0:
                 print(f"{i + 1}/{len(tasks)}", flush=True)
     Path(out).parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(res).to_parquet(out)
+    write_with_header(pd.DataFrame(res), out, mode="fssc", rows=len(res), graph="er")
     print(f"wrote {len(res)} rows to {out}")
 
 

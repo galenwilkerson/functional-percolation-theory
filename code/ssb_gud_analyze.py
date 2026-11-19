@@ -1,4 +1,5 @@
 """Analysis of G (finite input density), U1 (upper edge, individual inputs) and D4 (lattice).
+G's "controls" = an input alone switches on >= 1% of nodes (the trigger set; SPEC S9/S10).
 Writes figures/tables to ../ssb_results/.   python ssb_gud_analyze.py"""
 import json
 import os
@@ -144,8 +145,10 @@ L["broken"] = L.K.between(1, 2)
 L["stab_ok"] = L.macro_stab == L.K.apply(lambda K: factorial(K) * factorial(3 - K))
 rows = []
 for (Ls, p), s in L.groupby(["L", "p"]):
-    P = float(s.gcc.mean())
-    rows.append(dict(L=Ls, p=p, n=len(s), P_inf=P, P_broken=float(s.broken.mean()), theory=1 - P ** 3 - (1 - P) ** 3,
+    Pi = (s.gcc * s.N - 3).clip(lower=0) / (s.N - 3)          # largest-cluster fraction without the inputs (approx.)
+    P = float(Pi.mean())
+    rows.append(dict(L=Ls, p=p, n=len(s), P_inf=P, P_broken=float(s.broken.mean()),
+                     theory=float((1 - Pi ** 3 - (1 - Pi) ** 3).mean()),   # per-sample average (no Jensen bias)
                      median_A=float(s.anis.median()), stab_ok=float(s.stab_ok[s.macro_n > 0].mean()) if (s.macro_n > 0).any() else np.nan))
 DL = pd.DataFrame(rows)
 DL.to_csv(OUT / "d4_lattice.csv", index=False)

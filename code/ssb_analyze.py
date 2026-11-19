@@ -1,4 +1,6 @@
-"""Analysis of ssb.py runs against RESEARCH_PROPOSAL_v2 (SB1-SB7).  Writes figures and tables to
+"""Analysis of ssb.py runs against RESEARCH_PROPOSAL_v2 (SB1-SB7).
+Cuts (SPEC S9): K_ctrl uses relevance >= 1% of nodes; macroscopic functions are classes on >= 1% of nodes; use these
+only well away from z_lo. Columns *_fitted_* use quantities measured on the same samples (they test independence only).  Writes figures and tables to
 ../ssb_results/.   python ssb_analyze.py"""
 import json
 from math import comb, factorial
@@ -78,7 +80,7 @@ for (phi, k, z), g in s.groupby(["phi", "k", "z"]):
         continue
     M = np.stack([g[f"m{j}"] - g[[f"m{i}" for i in range(k)]].mean(axis=1) for j in range(k)], axis=1)
     tt = [stats.ttest_1samp(M[:, j], 0).pvalue for j in range(k)]
-    sb1.append(dict(test=f"E M_i = 0 (z={z})", phi=phi, k=k, counts="", p=float(min(tt) * k)))
+    sb1.append(dict(test=f"E M_i = 0 (z={z})", phi=phi, k=k, counts="", p=float(min(1.0, min(tt) * k))))
 sb1 = pd.DataFrame(sb1)
 sb1.to_csv(OUT / "sb1_symmetry.csv", index=False)
 KEY["SB1_min_p"] = float(sb1.p.min())
@@ -105,9 +107,12 @@ savefig(fig, "fig_sb2_anisotropy.pdf")
 for (phi, k, N, z), g in t.groupby(["phi", "k", "N", "z"]):
     if any(np.isclose(z, v) for v in (0.5, 0.9, 1.5, 2.0, 3.0)):
         S = float(th.S_er(z)[0])
+        er = phi == 0.1          # the ER-S closed forms apply only in simple contagion (SPEC issue 4)
         rows.append(dict(phi=phi, k=k, N=N, z=round(z, 2), median_A=g.anis.median(), mean_A=g.anis.mean(),
-                         broken_frac=float((g.anis > 1e-3).mean()), theory_mean=th.anis_mean(S, k),
-                         theory_median=th.anis_quantile(S, k, 0.5), n=len(g)))
+                         broken_frac=float((g.anis > 1e-3).mean()),
+                         theory_mean=th.anis_mean(S, k) if er else np.nan,
+                         theory_median=th.anis_quantile(S, k, 0.5) if er else np.nan,
+                         n_rows=len(g), n_networks=int(g.seed.nunique())))
 sb2 = pd.DataFrame(rows)
 sb2.to_csv(OUT / "sb2_anisotropy.csv", index=False)
 # restated SB2 (after review): P(A>0) = 1 - q^k - (1-q)^k, from the tilt samples (independent graphs)
@@ -123,7 +128,7 @@ for ax, k in zip(axs, (3, 4, 5)):
                 zs.append(z)
                 pb.append(float(g.K_ctrl.between(1, k - 1).mean()))
                 pth.append(th.p_broken(q, k))
-                rows.append(dict(k=k, phi=phi, N=N, z=z, P_broken=pb[-1], theory=pth[-1], q=q, C=C, n=len(g)))
+                rows.append(dict(k=k, phi=phi, N=N, z=z, P_broken=pb[-1], theory_fitted_q=pth[-1], q_measured=q, C_measured=C, n=len(g)))
             if N in (4000, 64000) or (src is t and N in (4000, 16000)):
                 ax.plot(zs, pb, mk + "-", ms=2.5, lw=0.8, color=NCOL[N], label=f"$\\varphi={phi}$, N={N}")
                 ax.plot(zs, pth, ":", color=NCOL[N], lw=0.8)
@@ -182,7 +187,7 @@ for (phi, k, N), g in t.groupby(["phi", "k", "N"]):
     if not len(h):
         continue
     pred = h.K_ctrl.apply(lambda K: factorial(K) * factorial(k - K))
-    rows.append(dict(phi=phi, k=k, N=N, n=len(h), frac_top_OR=float(h.top_isOR.mean()),
+    rows.append(dict(phi=phi, k=k, N=N, n_rows=len(h), n_networks=int(h.seed.nunique()), frac_top_OR=float(h.top_isOR.mean()),
                      frac_stab_eq_KkK=float((h.macro_stab == pred).mean()),
                      mean_states=float((factorial(k) / h.macro_stab).mean()),
                      frac_with_nonOR_macro=float((h.macro_nonOR > 0).mean()),
@@ -230,8 +235,8 @@ for (phi, k, z, N), g in s.groupby(["phi", "k", "z", "N"]):
     q, C = qC(g)
     m2, m4 = float((g.M0 ** 2).mean()), float((g.M0 ** 4).mean())
     rows.append(dict(phi=phi, k=k, z=z, N=N, mean_absM0=float(g.M0.abs().mean()),
-                     theory_absM0_ER=sum(p * abs(M) for p, M, _, _ in th.mixture(S, k)),
-                     theory_absM0_qC=sum(p * abs(M) for p, M, _, _ in th.mixture(C, k, q)),
+                     theory_absM0_ER=sum(p * abs(M) for p, M, _, _ in th.mixture(S, k)) if phi == 0.1 else np.nan,
+                     theory_absM0_fitted_qC=sum(p * abs(M) for p, M, _, _ in th.mixture(C, k, q)),
                      q=q, C=C, gcc=float(g.gcc.mean()), mean_Mvec=float(g.Mvec.mean()),
                      binder=1 - m4 / (3 * m2 ** 2) if m2 > 0 else np.nan,
                      median_A=float(g.anis.median()), n=len(g)))
@@ -301,7 +306,8 @@ for (phi, k, z, N), g in s.groupby(["phi", "k", "z", "N"]):
         bs = [float(th.tilted_empirical(g.M0.values[rng.integers(0, len(g), len(g))], eps * N)[0])
               for _ in range(200)]
         rows.append(dict(phi=phi, k=k, z=z, N=N, eps=eps, M0_eps=y, boot_sd=float(np.std(bs)),
-                         limit=S * (1 - 1 / k), theory_finiteN=float(th.tilted_M0(S, k, eps * N)[0]),
+                         limit=S * (1 - 1 / k) if phi == 0.1 else np.nan,
+                         theory_finiteN=float(th.tilted_M0(S, k, eps * N)[0]) if phi == 0.1 else np.nan,
                          expected_top_peak_count=p_top * len(g), n=len(g)))
 sb6 = pd.DataFrame(rows)
 sb6.to_csv(OUT / "sb6_field.csv", index=False)
@@ -323,7 +329,8 @@ savefig(fig, "fig_sb6_order_vs_z.pdf")
 # one extra edge from input 0 on a FIXED network; chi = N E[dm0] (nodes whose dependence on input 0 changes)
 rows = []
 for (phi, k, z, N), g in s.groupby(["phi", "k", "z", "N"]):
-    rows.append(dict(phi=phi, k=k, z=z, N=N, chi=float(N * g.pert_dm0.mean()), chi_se=float(N * g.pert_dm0.sem()),
+    nk = N - k                     # dm0 is a fraction of the N - k non-input nodes (SPEC issue 8)
+    rows.append(dict(phi=phi, k=k, z=z, N=N, chi=float(nk * g.pert_dm0.mean()), chi_se=float(nk * g.pert_dm0.sem()),
                      dm0_over=float(g.pert_dm0.mean()), frac_flip_macro=float((g.pert_dm0.abs() > 0.01).mean()),
                      changed=float(g.pert_changed.mean()), n=len(g)))
 sb6b = pd.DataFrame(rows)

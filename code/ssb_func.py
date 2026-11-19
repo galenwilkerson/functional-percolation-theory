@@ -28,6 +28,7 @@ from scipy.sparse.csgraph import connected_components
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+from spec_card import check_spec, write_with_header  # noqa: E402
 from ssb import adjacency, edge_sequence  # noqa: E402
 
 DELTA = 0.01
@@ -255,6 +256,7 @@ def main():
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     tasks, fn = grid(a.mode, a.smoke)
+    check_spec(mode=a.mode, phis=sorted({t[2] for t in tasks}), graph="er")
     tasks.sort(key=lambda t: -(t[0] * (1 << t[1]) if isinstance(t[1], int) else t[0] * t[1]))
     ncpu = int(os.environ.get("GQ_CPUS", os.cpu_count() or 4))
     res = []
@@ -264,7 +266,7 @@ def main():
             if (i + 1) % max(1, len(tasks) // 20) == 0:
                 print(f"{i + 1}/{len(tasks)}", flush=True)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(res).to_parquet(a.out)
+    write_with_header(pd.DataFrame(res), a.out, mode=a.mode, rows=len(res), graph="er")
     print(f"wrote {len(res)} rows to {a.out}")
 
 

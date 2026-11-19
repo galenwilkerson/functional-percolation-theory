@@ -39,6 +39,7 @@ from scipy.sparse.csgraph import connected_components
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+from spec_card import check_spec, write_with_header  # noqa: E402
 from dtc import dtc_exact  # noqa: E402
 
 DEDEKIND = {1: 3, 2: 6, 3: 20, 4: 168, 5: 7581}
@@ -176,6 +177,8 @@ def summarize(codes, inputs, lab, k, fc, census=True):
     # the giant component's function
     big = np.argmax(np.bincount(lab))
     gmask = (lab == big) & mask
+    if not gmask.any():                       # largest component holds only inputs (tiny graphs)
+        gmask = mask
     gu, gc = np.unique(codes[gmask], return_counts=True)
     j = int(np.argmax(gc))
     g = int(gu[j])
@@ -277,6 +280,7 @@ def main():
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     tasks, fn = grid(a.mode, a.smoke)
+    check_spec(mode=a.mode, phis=sorted({t[2] for t in tasks}), graph="er")
     tasks.sort(key=lambda t: -t[0])                       # big N first, for load balance
     ncpu = int(os.environ.get("GQ_CPUS", os.cpu_count() or 4))
     res = []
@@ -286,7 +290,7 @@ def main():
             if (i + 1) % max(1, len(tasks) // 20) == 0:
                 print(f"{i + 1}/{len(tasks)}", flush=True)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(res).to_parquet(a.out)
+    write_with_header(pd.DataFrame(res), a.out, mode=a.mode, rows=len(res), graph="er")
     print(f"wrote {len(res)} rows to {a.out}")
 
 

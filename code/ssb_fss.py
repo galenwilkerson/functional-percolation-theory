@@ -17,6 +17,7 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+from spec_card import check_spec, write_with_header  # noqa: E402
 from ssb import run_sample  # noqa: E402
 
 ZC = {0.1: 1.0, 0.25: 1.1140}
@@ -57,6 +58,7 @@ def main():
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     ts = tasks(a.smoke)
+    check_spec(mode="fss", phis=sorted({t[2] for t in ts}), graph="er")
     ncpu = int(os.environ.get("GQ_CPUS", os.cpu_count() or 4))
     res = []
     with Pool(ncpu) as pool:
@@ -65,7 +67,7 @@ def main():
             if (i + 1) % max(1, len(ts) // 20) == 0:
                 print(f"{i + 1}/{len(ts)}", flush=True)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(res).to_parquet(a.out)
+    write_with_header(pd.DataFrame(res), a.out, mode="fss", rows=len(res), graph="er")
     print(f"wrote {len(res)} rows to {a.out}")
 
 

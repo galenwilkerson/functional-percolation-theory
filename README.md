@@ -73,6 +73,8 @@ summary tables in `summaries/ssb/`.
 | `ssb_theory.py` | closed forms (mixture of broken states, $P(\text{broken})$, residual groups) |
 | `ssb_analyze.py`, `ssb_func_analyze.py`, `ssb_gud_analyze.py`, `ssb_fss_analyze.py` | analysis and figures (`SSB_DATA`, `SSB_OUT` override the paths) |
 | `grouped_inputs.py`, `nonor_theory.py` | grouped inputs and the tree recursion for non-OR functions |
+| `fig_v12.py` | main-text figures of the next version: functional phase diagram, input-symmetry breaking, beyond connectivity |
+| `spec_card.py` | the run contract: `check_spec()` at startup of every run, and a parquet header recording the facts used |
 
 Run a simulation with `--out data/ssb/<name>.parquet` from the repository root's `code/` folder, or set `SSB_DATA`.
 

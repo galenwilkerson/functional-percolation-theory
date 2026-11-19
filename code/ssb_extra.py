@@ -25,6 +25,7 @@ from scipy.sparse.csgraph import connected_components
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+from spec_card import check_spec, write_with_header  # noqa: E402
 from ssb import FnCache, adjacency, edge_sequence, functions, summarize  # noqa: E402
 from lattice2d import lattice_edges  # noqa: E402
 
@@ -186,6 +187,7 @@ def main():
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     tasks, fn = grid(a.mode, a.smoke)
+    check_spec(mode=a.mode, phis=sorted({(0.1 if a.mode == "lattice" else t[2]) for t in tasks}), graph=("lattice" if a.mode == "lattice" else "er"))
     ncpu = int(os.environ.get("GQ_CPUS", os.cpu_count() or 4))
     res = []
     with Pool(ncpu) as pool:
@@ -194,7 +196,7 @@ def main():
             if (i + 1) % max(1, len(tasks) // 20) == 0:
                 print(f"{i + 1}/{len(tasks)}", flush=True)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(res).to_parquet(a.out)
+    write_with_header(pd.DataFrame(res), a.out, mode=a.mode, rows=len(res), graph=("lattice" if a.mode == "lattice" else "er"))
     print(f"wrote {len(res)} rows to {a.out}")
 
 
