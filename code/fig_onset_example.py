@@ -295,14 +295,16 @@ def main():
     c.text(0.98, 1.03, "$z_c$", ha="right", fontsize=8, color=MUTED)
     c.text(1.14, 1.03, r"$z_{\rm lo}$", ha="left", fontsize=8, color=MUTED)
     c.axvline(Z, color=INK, lw=0.9, ls="--", zorder=0)
+    c.plot([Z, Z], [-0.1, 0], transform=c.get_xaxis_transform(), color=INK, lw=0.9, ls="--", clip_on=False)
     for yv, lab, col in ((_S(Z), "a", C_GCC), (watts.trigger_prob(Z, PHI), "b", C_OR)):
         c.plot([Z], [yv], "o", ms=9, mfc="white", mec=col, mew=1.3, zorder=5)
         c.text(Z, yv, lab, ha="center", va="center", fontsize=7.5, fontweight="bold", color=col, zorder=6)
-    c.text(Z - 0.03, 0.03, f"$z={Z}$", ha="right", va="bottom", fontsize=8, color="0.25")
+    c.text(Z, -0.11, f"$z={Z}$", ha="center", va="top", fontsize=8, color=INK, fontweight="bold",
+           transform=c.get_xaxis_transform(), clip_on=False)
     c.set_xlim(0.2, 3.2)
     c.set_ylim(0, 1.27)
     c.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
-    c.set_xlabel("mean degree $z$ (average number of links per node)", fontsize=9)
+    c.set_xlabel("mean degree $z$ (average number of links per node)", fontsize=9, labelpad=14)
     c.set_ylabel("probability that an input is\nconnected / controlling", fontsize=9)
     c.set_title(r"(c) inputs are connected from $z_c$ on, but control only from $z_{\rm lo}$ on, and not all of them",
                 fontsize=9, loc="left", pad=14)
