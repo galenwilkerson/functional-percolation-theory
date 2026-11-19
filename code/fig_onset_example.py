@@ -31,6 +31,7 @@ INK, MUTED = "#2b2a28", "#5f5c56"
 C_GCC, C_EDGE = "#e07b39", "#8a877f"
 C_OR, C_NON, C_FIN, C_ZERO = "#2f6db5", "#c0392b", "#6aa84f", "#e4e2dc"
 C_AB = "#8e5bb5"
+C_RING = "#d4a017"
 
 
 def fixed_point(G, inputs, x, phi=None):
@@ -183,7 +184,7 @@ def by_inputs(cls):
             for u, c in cls.items()}
 
 
-def draw_graph(ax, G, inputs, mc, title, notes=()):
+def draw_graph(ax, G, inputs, mc, title, notes=(), ring=(), sym=None):
     pos = layout(G)
     H = G.subgraph([u for u in G if u in pos])
     gcc = max(nx.connected_components(G), key=len)
@@ -199,10 +200,15 @@ def draw_graph(ax, G, inputs, mc, title, notes=()):
     non = [u for u in others if mc[u] == "non"]
     nx.draw_networkx_nodes(H, pos, nodelist=non, node_color=C_NON, node_size=36, linewidths=0.5,
                            edgecolors=INK, ax=ax)
+    if ring:
+        nx.draw_networkx_nodes(H, pos, nodelist=list(ring), node_color="none", node_shape="s", node_size=150,
+                               edgecolors=C_RING, linewidths=1.8, ax=ax)
     nx.draw_networkx_nodes(H, pos, nodelist=inputs, node_color=INK, node_shape="s", node_size=40, ax=ax)
+    if sym:
+        ax.text(0.0, -0.02, sym, transform=ax.transAxes, fontsize=7.4, color=INK, ha="left", va="top")
     for lab, u in zip("ABC", inputs):
         x, y = pos[u]
-        ax.text(x, y + 0.035, lab, ha="center", va="bottom", fontsize=9, fontweight="bold", color=INK)
+        ax.text(x, y + 0.05, lab, ha="center", va="bottom", fontsize=9, fontweight="bold", color=INK)
     for u, txt, dx, dy in notes:
         x, y = pos[u]
         ax.annotate(txt, (x, y), xytext=(x + dx, y + dy), fontsize=6.5, color=INK, ha="center",
@@ -228,10 +234,15 @@ def main():
     mc_a, mc_b = by_inputs(cls_a), by_inputs(cls_b)
 
     fig = plt.figure(figsize=(7.0, 5.2))
-    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.42, 1.0], hspace=0.24, wspace=0.12)
+    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.42, 1.0], hspace=0.42, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
-    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nevery connected node responds to $A$ or $B$")
+    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nevery connected node responds to $A$ or $B$",
+               ring=inputs[:2],
+               sym="ringed: inputs that control the giant cascade ($A$, $B$)\n"
+                   "symmetry left: swapping $A\\leftrightarrow B$ only")
     draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nonly $A$ controls; $B$ is connected but inert",
+               ring=inputs[:1],
+               sym="ringed: $A$ only\nsymmetry left: swapping $B\\leftrightarrow C$ only",
                notes=[(inputs[1], "$B$: connected, but\nswitches nothing on", 0.16, -0.24)])
 
     def key(ax, items):
