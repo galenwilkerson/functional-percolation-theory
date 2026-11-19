@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite the paper and the software as below."
+title: "Functional percolation: theory (code and summary data)"
+type: software
+authors:
+  - family-names: Wilkerson
+    given-names: Galen J.
+    affiliation: Komplexity AI LLC
+repository-code: "https://github.com/galenwilkerson/functional-percolation-theory"
+license: MIT
+version: "main (2026-11-18)"
+date-released: "2026-11-18"
+keywords:
+  - percolation
+  - threshold cascades
+  - Boolean functions
+  - complex networks
+preferred-citation:
+  type: unpublished
+  title: "Statistical Mechanics of Functional Percolation: Input-Driven Response in Network Cascades"
+  authors:
+    - family-names: Wilkerson
+      given-names: Galen J.
+  year: 2026
+  notes: "Paper in preparation"

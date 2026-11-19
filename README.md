@@ -56,11 +56,57 @@ Theory checks: `verify_theory.py`, `watts.py` (vulnerable-cluster quantities), `
 `exact_cluster_size.py` (exact finite-$N$ mean cluster size, for the finite-size-scaling check).
 `lattice_info.py` (2D information runs) is kept for completeness; its results are not used in the paper.
 
+## Symmetry breaking of the input symmetry (for the next version of the paper)
+
+With k inputs, relabelling them (Sym_k) is a symmetry of the ensemble of networks. These scripts measure how
+functional percolation breaks it: the relevance of each input (fraction of nodes whose function depends on it),
+the residual symmetry group of the macroscopic function, and their finite-size scaling. All exact, CPU only;
+summary tables in `summaries/ssb/`.
+
+| Script | What it does |
+|---|---|
+| `ssb.py traj` / `ssb.py tilt` | grown networks (edges added one at a time) and independent networks: relevance vector, residual group, one-edge response |
+| `ssb_func.py conn` / `density` / `finiteh` | functional relevance against connectivity reach; beyond-OR functions at finite input density; trigger set at finite input density |
+| `ssb_extra.py upper` / `lattice` | upper cascade edge with individual inputs (OR of a trigger set vs a quorum on the count); the square lattice |
+| `ssb_fss.py` | finite-size scaling at the onset, $z=z_c+\lambda N^{-1/3}$ |
+| `ssb_theory.py` | closed forms (mixture of broken states, $P(\text{broken})$, residual groups) |
+| `ssb_analyze.py`, `ssb_func_analyze.py`, `ssb_gud_analyze.py`, `ssb_fss_analyze.py` | analysis and figures (`SSB_DATA`, `SSB_OUT` override the paths) |
+| `grouped_inputs.py`, `nonor_theory.py` | grouped inputs and the tree recursion for non-OR functions |
+
+Run a simulation with `--out data/ssb/<name>.parquet` from the repository root's `code/` folder, or set `SSB_DATA`.
+
 ## Rerunning the simulations
 
 Each simulation script documents its command line in its header and writes to `data/` (not
 tracked). The `--fit-only` / `--use-fit` options of the GPU scripts use an optional batch-size
 helper (`GPUFIT_PATH`) and can be ignored; the default batch sizes work.
+
+## How to cite
+
+The paper (in preparation):
+
+```bibtex
+@unpublished{Wilkerson2026FunctionalPercolation,
+  author = {Wilkerson, Galen J.},
+  title  = {Statistical Mechanics of Functional Percolation: Input-Driven Response in Network Cascades},
+  year   = {2026},
+  note   = {Paper in preparation}
+}
+```
+
+The software:
+
+```bibtex
+@software{Wilkerson2026FunctionalPercolationCode,
+  author  = {Wilkerson, Galen J.},
+  title   = {Functional percolation: theory (code and summary data)},
+  year    = {2026},
+  url     = {https://github.com/galenwilkerson/functional-percolation-theory},
+  version = {main, 2026-11-18}
+}
+```
+
+GitHub's "Cite this repository" button reads the same information from `CITATION.cff`.
 
 ## License
 
