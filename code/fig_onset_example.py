@@ -247,13 +247,13 @@ def main():
     fig = plt.figure(figsize=(7.0, 5.0))
     gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.26, 1.0], hspace=0.42, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
-    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion, $z={Z}$\nconnectivity is sufficient",
+    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion, $z={Z}$\nfunction = connectivity",
                ring=inputs[:2],
                sym="$A$ and $B$ both control the giant cascade (gold boxes)\n"
                    "swapping $A\\leftrightarrow B$ changes nothing: symmetric")
     draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nconnectivity is not sufficient",
                ring=inputs[:1],
-               sym="only $A$ controls the giant cascade (gold box)\n"
+               sym="only $A$ controls the giant cascade (gold box); $B$ is connected\n"
                    "swapping $A\\leftrightarrow B$ changes the function: broken")
 
     def key(ax, items):
