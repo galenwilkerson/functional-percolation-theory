@@ -155,7 +155,7 @@ def fig_ssb3():
     """Main text: (a) grown network, (b) broken states, (c) broken by function vs connectivity, in one row."""
     t = _prep(pd.read_parquet(DATA / "traj.parquet"))
     s = _prep(pd.read_parquet(DATA / "tilt.parquet"))
-    fig, axs = plt.subplots(1, 3, figsize=(7.0, 3.0), gridspec_kw=dict(width_ratios=[1, 1, 1.15]))
+    fig, axs = plt.subplots(1, 3, figsize=(7.0, 2.45), gridspec_kw=dict(width_ratios=[1, 1, 1.15]))
     p_traj(axs[0], t)
     p_atoms(axs[1], s)
     p_func_conn(axs[2], s)
