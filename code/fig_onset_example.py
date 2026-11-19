@@ -1,10 +1,10 @@
-"""Fig. 1 (v16): function vs connectivity at phi = 0.25.
+"""Fig. 1 (v16): connectivity is necessary, not sufficient, for function.
 
-Top: one small G(N, z/N) at each of three mean degrees, k = 3 clamped inputs (squares). Node colour = function at the
-cascade fixed point (OR of the triggering inputs on a macroscopic set, non-OR, finite-cluster function, zero); orange
-edges = giant component. Bottom: probability that an input lies in the giant component (S) or controls the global
-cascade (Watts' P_t) against z, with the three example z marked. Examples are random graphs, chosen by seed search to
-show the effects named in the caption.
+Top: one small G(N, z/N) (z = 2.2) with k = 3 clamped inputs (squares), drawn twice with the same layout:
+(a) simple contagion (phi = 0.1; every node here has degree <= 10), (b) phi = 0.25. Node colour = function at the
+cascade fixed point; orange edges = giant component. Bottom: probability that an input lies in the giant component (S)
+or controls the global cascade (Watts' P_t) at phi = 0.25, against z. The graph was chosen by seed search so that two
+inputs lie in the giant component and only one controls at phi = 0.25 (typical: about half of samples).
 """
 import itertools
 import math
@@ -32,7 +32,7 @@ C_GCC, C_EDGE = "#e07b39", "#8a877f"
 C_OR, C_NON, C_FIN, C_ZERO = "#2f6db5", "#c0392b", "#8fb3de", "#e4e2dc"
 
 
-def fixed_point(G, inputs, x):
+def fixed_point(G, inputs, x, phi=None):
     """Least fixed point of the LTM with inputs clamped to x (clamped-off inputs never fire)."""
     on = {u for u, xi in zip(inputs, x) if xi}
     off = set(inputs) - on
@@ -46,17 +46,17 @@ def fixed_point(G, inputs, x):
             d = G.degree(u)
             if d == 0:
                 continue
-            need = math.ceil(PHI * d - 1e-9)
+            need = math.ceil((PHI if phi is None else phi) * d - 1e-9)
             if sum(1 for v in G.neighbors(u) if v in act) >= need:
                 act.add(u)
                 changed = True
     return act
 
 
-def functions(G, inputs):
+def functions(G, inputs, phi=None):
     k = len(inputs)
     pats = list(itertools.product((0, 1), repeat=k))
-    acts = [fixed_point(G, inputs, x) for x in pats]
+    acts = [fixed_point(G, inputs, x, phi) for x in pats]
     f = {u: tuple(int(u in a) for a in acts) for u in G.nodes if u not in inputs}
     return pats, f
 
@@ -222,72 +222,68 @@ def _S(z):
 
 def main():
     from matplotlib.lines import Line2D
-    ZS = (0.8, 2.2, 3.5)
-    Glo, ilo, clo, slo = find_low(z=ZS[0])
-    Gmid, imid, cmid, _, smid = find_example(z=ZS[1])
-    Ghi, ihi, chi, shi = find_high(z=ZS[2])
+    Z = 2.2
+    G, inputs, cls_b, gcc, seed = find_example(z=Z)
+    pats, fa = functions(G, inputs, phi=0.1)
+    assert max(dict(G.degree).values()) <= 10
+    cls_a = {u: classify(t, pats) for u, t in fa.items()}
+    mc_a, mc_b = macro_classes(G, inputs, cls_a), macro_classes(G, inputs, cls_b)
 
-    fig = plt.figure(figsize=(7.0, 5.0))
-    gs = fig.add_gridspec(3, 3, height_ratios=[1.15, 1.0, 0.2], hspace=0.5, wspace=0.08)
-    ax = [fig.add_subplot(gs[0, i]) for i in range(3)]
-    draw_graph(ax[0], Glo, ilo, macro_classes(Glo, ilo, clo),
-               f"(a) $z={ZS[0]}$\nno giant component")
-    draw_graph(ax[1], Gmid, imid, macro_classes(Gmid, imid, cmid),
-               f"(b) $z={ZS[1]}$\n$A$ controls; $B$ only connected",
-)
-    draw_graph(ax[2], Ghi, ihi, macro_classes(Ghi, ihi, chi),
-               f"(c) $z={ZS[2]}$\nconnected; no input controls")
+    fig = plt.figure(figsize=(7.0, 4.9))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1.3, 0.12, 1.0], hspace=0.32, wspace=0.12)
+    ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
+    draw_graph(ga, G, inputs, mc_a, "(a) simple contagion ($\\varphi=0.1$)\nfunction = connectivity")
+    draw_graph(gb, G, inputs, mc_b, "(b) $\\varphi=0.25$, same graph\n$B$ connected but not controlling")
 
-    c = fig.add_subplot(gs[1, :])
+    def key(ax, items):
+        ax.set_axis_off()
+        h = [Line2D([], [], marker="o", ls="", mfc=c, mec=INK, mew=0.5, ms=ms, label=l) for c, ms, l in items]
+        ax.legend(handles=h, loc="upper center", ncol=len(h), fontsize=6.8, frameon=False, handletextpad=0.3,
+                  columnspacing=1.0, borderaxespad=0)
+    key(fig.add_subplot(gs[1, 0]), [(C_OR, 6, r"$x_A\vee x_B$"),
+                                    (C_FIN, 6, r"$x_C$"), (C_ZERO, 6, "zero")])
+    key(fig.add_subplot(gs[1, 1]), [(C_OR, 6, r"$x_A$"),
+                                    (C_NON, 8, r"$x_A\wedge x_B$"),
+                                    (C_FIN, 6, r"$x_C$"), (C_ZERO, 6, "zero")])
+
+    c = fig.add_subplot(gs[2, :])
     d = pd.read_csv(CONN)
     d = d[d.N == d.N.max()].copy()
     d["wf"], d["wc"] = d.q_func * d.n, d.q_conn * d.n
     g = d[np.isclose(d.phi, PHI)].groupby("z")[["wf", "wc", "n"]].sum()
     g["qf"], g["qc"] = g.wf / g.n, g.wc / g.n
-    zz = np.linspace(0.05, 4.6, 400)
-    c.plot(zz, [_S(z) for z in zz], "-", color=C_GCC, lw=1.5, label="input in giant component ($S$)")
+    zz = np.linspace(0.2, 4.4, 400)
+    c.plot(zz, [_S(z) for z in zz], "-", color=C_GCC, lw=1.5,
+           label="input in giant component, $S$ (controls, in simple contagion)")
     c.plot(zz, [watts.trigger_prob(z, PHI) for z in zz], "-", color=C_OR, lw=1.5,
-           label="input controls the cascade ($P_t$)")
+           label=r"input controls the cascade, $P_t$ ($\varphi=0.25$)")
     c.plot(g.index, g.qc, "o", color=C_GCC, ms=3.5, mfc="white")
     c.plot(g.index, g.qf, "s", color=C_OR, ms=3.5)
-    for zv, lab in ((1.0, "$z_c$"), (1.114, r"$z_{\rm lo}$"), (3.863, r"$z_{\rm hi}$")):
+    for zv in (1.0, 1.114, 3.863):
         c.axvline(zv, color=MUTED, lw=0.7, ls="--")
-    c.text(0.98, 1.0, "$z_c$", ha="right", fontsize=7, color=MUTED)
-    c.text(1.14, 1.0, r"$z_{\rm lo}$", ha="left", fontsize=7, color=MUTED)
-    c.text(3.89, 1.0, r"$z_{\rm hi}$", ha="left", fontsize=7, color=MUTED)
-    for zv, lab in zip(ZS, "abc"):
-        c.axvline(zv, color="0.6", lw=0.6, zorder=0)
-        c.text(zv, 1.12, f"({lab})", ha="center", va="center", fontsize=7.5, color="0.3",
-               bbox=dict(fc="white", ec="none", pad=0.6))
-    # put z of (a) under the centre of panel (a) and z of (c) under the centre of panel (c)
-    pa, pc_, p2 = ax[0].get_position(), ax[2].get_position(), c.get_position()
-    xa, xc = 0.5 * (pa.x0 + pa.x1), 0.5 * (pc_.x0 + pc_.x1)
-    sl = (ZS[2] - ZS[0]) / (xc - xa)
-    c.set_xlim(ZS[0] - (xa - p2.x0) * sl, ZS[0] + (p2.x1 - xa) * sl)
+    c.text(0.98, 1.03, "$z_c$", ha="right", fontsize=7, color=MUTED)
+    c.text(1.14, 1.03, r"$z_{\rm lo}$", ha="left", fontsize=7, color=MUTED)
+    c.text(3.89, 1.03, r"$z_{\rm hi}$", ha="left", fontsize=7, color=MUTED)
+    c.axvline(Z, color="0.6", lw=0.6, zorder=0)
+    c.text(Z, 1.12, "(a, b)", ha="center", va="center", fontsize=7.5, color="0.3",
+           bbox=dict(fc="white", ec="none", pad=0.6))
+    c.set_xlim(0.2, 4.4)
     c.set_ylim(0, 1.2)
     c.set_xlabel("mean degree $z$", fontsize=8)
     c.set_ylabel("probability per input", fontsize=8)
-    c.set_title(r"(d) $\varphi=0.25$: connectivity starts at $z_c$, function at $z_{\rm lo}$", fontsize=8.5, loc="left", pad=10)
+    c.set_title(r"(c) connectivity starts at $z_c$; function starts at $z_{\rm lo}$ and stops at $z_{\rm hi}$",
+                fontsize=8.5, loc="left", pad=12)
     c.tick_params(labelsize=7)
     for sp in ("top", "right"):
         c.spines[sp].set_visible(False)
-    c.legend(fontsize=6.5, frameon=False, loc="lower center", bbox_to_anchor=(0.6, 0.02))
-
-    lg = fig.add_subplot(gs[2, :])
-    lg.set_axis_off()
-    h = [Line2D([], [], marker="o", ls="", mfc=C_OR, mec=INK, mew=0.5, label=r"macroscopic OR of the triggers"),
-         Line2D([], [], marker="o", ls="", mfc=C_NON, mec=INK, mew=0.5, ms=8, label=r"non-OR ($x_A\wedge x_B$)"),
-         Line2D([], [], marker="o", ls="", mfc=C_FIN, mec=INK, mew=0.5, label="finite-cluster function"),
-         Line2D([], [], marker="o", ls="", mfc=C_ZERO, mec=INK, mew=0.5, label="zero function"),
-         Line2D([], [], marker="s", ls="", color=INK, label="input"),
-         Line2D([], [], ls="-", lw=1.2, color=C_GCC, label="giant-component edge"),
-         Line2D([], [], ls="-", lw=1.0, color=C_EDGE, label="other edge")]
-    lg.legend(handles=h, loc="center", ncol=4, fontsize=7, frameon=False, handletextpad=0.4, columnspacing=1.2)
+    c.legend(fontsize=6.5, frameon=False, loc="lower center", bbox_to_anchor=(0.62, 0.02))
 
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "fig_onset_example.pdf", bbox_inches="tight")
     fig.savefig(OUT / "fig_onset_example.png", dpi=170, bbox_inches="tight")
-    print("seeds", slo, smid, shi)
+    na = sum(v == "or" for v in mc_a.values()); nb = sum(v == "or" for v in mc_b.values())
+    print(f"seed={seed} gcc={len(gcc)} OR(a)={na} OR(b)={nb} nonOR(b)={sum(v == 'non' for v in mc_b.values())}",
+          {u: c_ for u, c_ in cls_a.items() if mc_a[u] == 'or'}.popitem()[1])
 
 
 if __name__ == "__main__":
