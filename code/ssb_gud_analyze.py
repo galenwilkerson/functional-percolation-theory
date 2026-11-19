@@ -127,13 +127,14 @@ for r, phi in enumerate((0.25, 0.2)):
                     color="C0" if h == 0.005 else "C3", label=f"h={h}, N={N}")
         ax.set_xscale("log")
         ax.set_title(f"$\\varphi={phi}$, $z={z}$", fontsize=8)
-        if r == 1:
-            ax.set_xlabel("fraction of inputs on, $c/k$")
     axs[r, 0].set_ylabel("P(global response)")
-axs[0, 0].legend(fontsize=7.6)
-fig.suptitle("U1: inside the window any trigger input suffices (OR); past $z_{hi}$ the network fires only above a "
-             "count of ON inputs", fontsize=7.5)
-fig.tight_layout()
+from matplotlib.lines import Line2D
+hs = [Line2D([], [], color="C0", lw=1.5, label="$h=0.005$"), Line2D([], [], color="C3", lw=1.5, label="$h=0.02$"),
+      Line2D([], [], color="k", lw=0.9, ls="--", marker="o", ms=2, label="$N=10^4$"),
+      Line2D([], [], color="k", lw=0.9, marker="o", ms=2, label="$N=10^5$")]
+fig.supxlabel("fraction of inputs on, $c/k$", fontsize=9, y=0.06)
+fig.legend(handles=hs, loc="lower center", ncol=4, fontsize=7.6, frameon=False, bbox_to_anchor=(0.5, 0.0))
+fig.tight_layout(rect=(0, 0.08, 1, 1))
 fig.savefig(OUT / "fig_u1_upper.pdf")
 plt.close(fig)
 

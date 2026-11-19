@@ -50,8 +50,12 @@ for c_, phi in enumerate((0.1, 0.2, 0.25)):
     axs[1, c_].set_xlabel("$z$")
 axs[0, 0].set_ylabel("P(broken)")
 axs[1, 0].set_ylabel("mean anisotropy $A$")
-axs[0, 0].legend(fontsize=7.6)
-fig.tight_layout()
+from matplotlib.lines import Line2D
+hs = [Line2D([], [], color="k", marker="o", ms=3, lw=1, label="function (controlling inputs)"),
+      Line2D([], [], color="k", marker="x", ms=3, lw=0.8, ls="--", label="connectivity (connected inputs)")]
+hs += [Line2D([], [], color=NCOL[N], lw=2, label=f"$N={N}$") for N in sorted(NCOL)]
+fig.legend(handles=hs, loc="lower center", ncol=5, fontsize=7.6, frameon=False, bbox_to_anchor=(0.5, 0.0))
+fig.tight_layout(rect=(0, 0.07, 1, 1))
 fig.savefig(OUT / "fig_f1_func_vs_conn.pdf")
 plt.close(fig)
 for phi in (0.1, 0.25):

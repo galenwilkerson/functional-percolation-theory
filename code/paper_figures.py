@@ -23,7 +23,7 @@ import pandas as pd  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, "/home/galen/Dropbox_2025/Dropbox/projects/LTM_learning/src")
 from ltm_learning.closed_forms import giant_fraction  # noqa: E402
 from watts import cascade_size, trigger_prob  # noqa: E402
 
@@ -507,8 +507,9 @@ def fig_dtc_v4():
         a.set_xlabel("decision-tree complexity $j$")
         panel(a, f"$z={z:g}$ ($S={r.S_th:.3f}$)")
     ax[0].set_ylabel(r"$\Pr[C_{\rm DT}=j]$")
-    ax[0].legend(fontsize=7.6, loc="lower left")
-    fig.tight_layout(w_pad=0.4)
+    h, l = ax[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="upper center", ncol=2, fontsize=7.8, frameon=False, bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout(w_pad=0.4, rect=(0, 0, 1, 0.9))
     fig.savefig(OUT / "fig_dtc.pdf")
 
 
