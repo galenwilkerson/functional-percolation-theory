@@ -155,22 +155,39 @@ def fig_ssb3():
     """Main text: (a) grown network, (b) broken states, (c) broken by function vs connectivity, in one row."""
     t = _prep(pd.read_parquet(DATA / "traj.parquet"))
     s = _prep(pd.read_parquet(DATA / "tilt.parquet"))
-    fig, axs = plt.subplots(1, 3, figsize=(7.0, 2.9))
+    fig, axs = plt.subplots(1, 3, figsize=(7.0, 3.0), gridspec_kw=dict(width_ratios=[1, 1, 1.15]))
     p_traj(axs[0], t)
     p_atoms(axs[1], s)
     p_func_conn(axs[2], s)
     panel(axs[0], r"(a) commitment ($\varphi=0.1$)")
     panel(axs[1], r"(b) broken states ($z=1.5$)")
-    axs[2].set_title(r"(c) controlling vs connected", loc="left", fontsize=8.4, color=INK)
-    # (b): one-column legend in the headroom above the atoms
-    axs[1].legend(fontsize=7.2, loc="upper right", ncol=1, handlelength=1.0, borderaxespad=0.1, labelspacing=0.2)
-    # (c): short labels
+    axs[2].set_title(r"(c) controlling vs connected", loc="left", fontsize=9, color=INK)
+    # (a): move the giant-component label off its curve, into the empty upper left
+    for txt in list(axs[0].texts):
+        if "giant" in txt.get_text():
+            txt.remove()
+    axs[0].text(2.05, 0.62, "giant\ncomponent\n(dotted)", fontsize=8, color=INK, ha="left", va="center")
+    # (b): legend in clear headroom above the atoms
+    lo, _ = axs[1].get_ylim()
+    for ln in list(axs[1].lines):
+        ln.remove()
+    S = float(th.S_er(1.5)[0])
+    for _, M, _, _ in th.mixture(S, 3):
+        axs[1].vlines(M, lo, 80, color="#52514e", lw=0.5, ls=":")
+    axs[1].set_ylim(lo, 3e4)
+    axs[1].legend(fontsize=7.4, loc="upper center", ncol=1, handlelength=1.0, borderaxespad=0.1, labelspacing=0.15)
+    # (c): legend in a band above the data; z_lo label at the foot of its line
+    for txt in list(axs[2].texts):
+        txt.remove()
+    axs[2].text(1.06, 1.2, r"$z_{\rm lo}$", fontsize=8.5, color="#52514e", ha="right", va="center")
+    axs[2].set_ylim(0, 1.3)
+    axs[2].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     h, _ = axs[2].get_legend_handles_labels()
     axs[2].legend(h, [r"controlling, $\varphi=0.25$", r"connected, $\varphi=0.25$", r"$\varphi=0.1$ (both)"],
-                  fontsize=7.2, loc="upper right", borderaxespad=0.1, labelspacing=0.2, handlelength=1.2)
+                  fontsize=7.4, loc="upper right", borderaxespad=0.1, labelspacing=0.15, handlelength=1.2)
     axs[2].set_ylabel("broken networks, $k=3$")
-    fig.tight_layout(w_pad=0.5)
-    fig.savefig(OUT / "fig_ssb3.pdf")
+    fig.tight_layout(w_pad=0.8)
+    fig.savefig(OUT / "fig_ssb3.pdf", bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
 
 
