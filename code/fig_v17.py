@@ -79,6 +79,8 @@ def p_func_conn(ax, s):
     ax.plot(zz, 1 - S ** 3 - (1 - S) ** 3, color=COL[1], ls="--", lw=0.9)
     ax.set_xlabel("$z$")
     ax.set_ylabel("fraction of broken networks, $k=3$")
+    ax.axvline(1.114, color="#52514e", lw=0.6)
+    ax.text(1.14, 1.12, r"$z_{\rm lo}$", fontsize=7, color="#52514e", va="top")
     ax.set_ylim(0, 1.2)
     ax.legend(fontsize=6.0, loc="upper right", ncol=1, borderaxespad=0.2)
     panel(ax, r"(c) broken by function, not connectivity")
