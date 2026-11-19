@@ -227,8 +227,8 @@ def main():
     Gmid, imid, cmid, _, smid = find_example(z=ZS[1])
     Ghi, ihi, chi, shi = find_high(z=ZS[2])
 
-    fig = plt.figure(figsize=(7.0, 4.7))
-    gs = fig.add_gridspec(2, 3, height_ratios=[1.15, 1.0], hspace=0.42, wspace=0.08)
+    fig = plt.figure(figsize=(7.0, 5.0))
+    gs = fig.add_gridspec(3, 3, height_ratios=[1.15, 1.0, 0.2], hspace=0.5, wspace=0.08)
     ax = [fig.add_subplot(gs[0, i]) for i in range(3)]
     draw_graph(ax[0], Glo, ilo, macro_classes(Glo, ilo, clo),
                f"(a) $z={ZS[0]}$\nno giant component")
@@ -238,13 +238,13 @@ def main():
     draw_graph(ax[2], Ghi, ihi, macro_classes(Ghi, ihi, chi),
                f"(c) $z={ZS[2]}$\nconnected; no input controls")
 
-    c = fig.add_subplot(gs[1, :2])
+    c = fig.add_subplot(gs[1, :])
     d = pd.read_csv(CONN)
     d = d[d.N == d.N.max()].copy()
     d["wf"], d["wc"] = d.q_func * d.n, d.q_conn * d.n
     g = d[np.isclose(d.phi, PHI)].groupby("z")[["wf", "wc", "n"]].sum()
     g["qf"], g["qc"] = g.wf / g.n, g.wc / g.n
-    zz = np.linspace(0.4, 4.3, 300)
+    zz = np.linspace(0.05, 4.6, 400)
     c.plot(zz, [_S(z) for z in zz], "-", color=C_GCC, lw=1.5, label="input in giant component ($S$)")
     c.plot(zz, [watts.trigger_prob(z, PHI) for z in zz], "-", color=C_OR, lw=1.5,
            label="input controls the cascade ($P_t$)")
@@ -256,19 +256,24 @@ def main():
     c.text(1.14, 1.0, r"$z_{\rm lo}$", ha="left", fontsize=7, color=MUTED)
     c.text(3.89, 1.0, r"$z_{\rm hi}$", ha="left", fontsize=7, color=MUTED)
     for zv, lab in zip(ZS, "abc"):
-        c.plot([zv], [1.1], "v", color=INK, ms=4)
-        c.text(zv, 1.14, f"({lab})", ha="center", va="bottom", fontsize=7.5, fontweight="bold", color=INK)
-    c.set_xlim(0.4, 4.3)
+        c.axvline(zv, color="0.6", lw=0.6, zorder=0)
+        c.text(zv, 1.12, f"({lab})", ha="center", va="center", fontsize=7.5, color="0.3",
+               bbox=dict(fc="white", ec="none", pad=0.6))
+    # put z of (a) under the centre of panel (a) and z of (c) under the centre of panel (c)
+    pa, pc_, p2 = ax[0].get_position(), ax[2].get_position(), c.get_position()
+    xa, xc = 0.5 * (pa.x0 + pa.x1), 0.5 * (pc_.x0 + pc_.x1)
+    sl = (ZS[2] - ZS[0]) / (xc - xa)
+    c.set_xlim(ZS[0] - (xa - p2.x0) * sl, ZS[0] + (p2.x1 - xa) * sl)
     c.set_ylim(0, 1.2)
     c.set_xlabel("mean degree $z$", fontsize=8)
     c.set_ylabel("probability per input", fontsize=8)
-    c.set_title(r"(d) $\varphi=0.25$: connectivity starts at $z_c$, function at $z_{\rm lo}$", fontsize=8.5, loc="left", pad=14)
+    c.set_title(r"(d) $\varphi=0.25$: connectivity starts at $z_c$, function at $z_{\rm lo}$", fontsize=8.5, loc="left", pad=10)
     c.tick_params(labelsize=7)
     for sp in ("top", "right"):
         c.spines[sp].set_visible(False)
     c.legend(fontsize=6.5, frameon=False, loc="lower center", bbox_to_anchor=(0.6, 0.02))
 
-    lg = fig.add_subplot(gs[1, 2])
+    lg = fig.add_subplot(gs[2, :])
     lg.set_axis_off()
     h = [Line2D([], [], marker="o", ls="", mfc=C_OR, mec=INK, mew=0.5, label=r"macroscopic OR of the triggers"),
          Line2D([], [], marker="o", ls="", mfc=C_NON, mec=INK, mew=0.5, ms=8, label=r"non-OR ($x_A\wedge x_B$)"),
@@ -277,7 +282,7 @@ def main():
          Line2D([], [], marker="s", ls="", color=INK, label="input"),
          Line2D([], [], ls="-", lw=1.2, color=C_GCC, label="giant-component edge"),
          Line2D([], [], ls="-", lw=1.0, color=C_EDGE, label="other edge")]
-    lg.legend(handles=h, loc="center left", fontsize=7, frameon=False, handletextpad=0.5)
+    lg.legend(handles=h, loc="center", ncol=4, fontsize=7, frameon=False, handletextpad=0.4, columnspacing=1.2)
 
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "fig_onset_example.pdf", bbox_inches="tight")
