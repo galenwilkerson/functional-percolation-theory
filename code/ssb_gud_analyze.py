@@ -28,28 +28,7 @@ plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.righ
 KEY = {}
 
 
-def seeded_response(z, phi, rho0, blocked, dmax=80):
-    """Gleeson-Cahalane tree theory with ON seeds (fraction rho0) and blocked OFF inputs (fraction blocked):
-    final active fraction of the other nodes."""
-    d = np.arange(dmax + 1)
-    pd_ = poisson.pmf(d, z)
-    need = np.array([ceil(phi * x - 1e-9) if x > 0 else 10 ** 9 for x in d])
-    q = rho0
-    for _ in range(5000):
-        s = 0.0
-        for dd in range(1, dmax + 1):
-            m = np.arange(need[dd], dd)
-            if len(m):
-                s += dd * pd_[dd] / z * sum(comb(dd - 1, int(mm)) * q ** mm * (1 - q) ** (dd - 1 - mm) for mm in m)
-        qn = rho0 + (1 - rho0 - blocked) * s
-        if abs(qn - q) < 1e-12:
-            break
-        q = qn
-    f = 0.0
-    for dd in range(1, dmax + 1):
-        m = np.arange(need[dd], dd + 1)
-        f += pd_[dd] * sum(comb(dd, int(mm)) * q ** mm * (1 - q) ** (dd - mm) for mm in m)
-    return f
+from ssb_theory import seeded_response  # noqa: E402
 
 
 # =============================================================================== G
@@ -183,5 +162,53 @@ ax.set_title("D4: square lattice; dotted $1-P_\\infty^3-(1-P_\\infty)^3$", fonts
 fig.tight_layout()
 fig.savefig(OUT / "fig_d4_lattice.pdf")
 plt.close(fig)
+# =============================================================================== U1b
+fp = DATA / f"{PFX}upperfine.parquet"
+if fp.exists():
+    from ssb_extra import cstar_theory
+    uf = pd.read_parquet(fp)
+    rows = []
+    for (phi, z, N), s in uf.groupby(["phi", "z", "N"]):
+        cs = cstar_theory(int(N), float(s.h.iloc[0]), float(phi), float(z))
+        recs = []
+        for _, r in s.iterrows():
+            cnt = np.asarray(r.counts)
+            glob = (np.asarray(r.resp) >= 0.5 * r.resp_allon) & (r.resp_allon >= 0.1)
+            for c in np.unique(cnt):
+                g_ = glob[cnt == c]
+                recs.append(dict(c=c, p=g_.mean(), dis=0 < g_.mean() < 1))
+        cur = pd.DataFrame(recs).groupby("c").agg(p=("p", "mean"), dis=("dis", "mean")).reset_index()
+        x = cur.c.values / cs
+        y = cur.p.values
+        def xat(level):
+            i = np.argmax(y >= level)
+            if y[i] < level or i == 0:
+                return np.nan
+            return float(np.interp(level, [y[i - 1], y[i]], [x[i - 1], x[i]]))
+        rows.append(dict(phi=phi, z=z, N=N, c_star_theory=cs, x50=xat(0.5), width=xat(0.9) - xat(0.1),
+                         mean_disagree=float(cur.dis.mean()), max_disagree=float(cur.dis.max()), n=len(s)))
+    UF = pd.DataFrame(rows)
+    UF.to_csv(OUT / "u1b_quorum.csv", index=False)
+    fig, axs = plt.subplots(1, 4, figsize=(7.2, 2.2), sharey=True)
+    for ax, ((phi, z), s0) in zip(axs, uf.groupby(["phi", "z"])):
+        for N, s in s0.groupby("N"):
+            cs = cstar_theory(int(N), float(s.h.iloc[0]), float(phi), float(z))
+            recs = []
+            for _, r in s.iterrows():
+                cnt = np.asarray(r.counts)
+                glob = (np.asarray(r.resp) >= 0.5 * r.resp_allon) & (r.resp_allon >= 0.1)
+                recs += [dict(c=c, p=glob[cnt == c].mean()) for c in np.unique(cnt)]
+            cur = pd.DataFrame(recs).groupby("c").p.mean()
+            ax.plot(cur.index / cs, cur.values, "o-", ms=2, lw=0.8, label=f"N={N}")
+        ax.axvline(1, color="gray", lw=0.4)
+        ax.set_title(f"$\\varphi={phi}$, $z={z}$", fontsize=7)
+        ax.set_xlabel("$c/c^*_{\\rm theory}$")
+    axs[0].set_ylabel("P(global response)")
+    axs[0].legend(fontsize=5.5)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_u1b_quorum.pdf")
+    plt.close(fig)
+    print(UF.round(3).to_string(index=False))
+
 json.dump(KEY, open(OUT / "key_numbers_GUD.json", "w"), indent=1)
 print(json.dumps(KEY, indent=1))

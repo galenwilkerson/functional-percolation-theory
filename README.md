@@ -67,8 +67,9 @@ summary tables in `summaries/ssb/`.
 |---|---|
 | `ssb.py traj` / `ssb.py tilt` | grown networks (edges added one at a time) and independent networks: relevance vector, residual group, one-edge response |
 | `ssb_func.py conn` / `density` / `finiteh` | functional relevance against connectivity reach; beyond-OR functions at finite input density; trigger set at finite input density |
-| `ssb_extra.py upper` / `lattice` | upper cascade edge with individual inputs (OR of a trigger set vs a quorum on the count); the square lattice |
-| `ssb_fss.py` | finite-size scaling at the onset, $z=z_c+\lambda N^{-1/3}$ |
+| `ssb_extra.py upper` / `upperfine` / `lattice` | upper cascade edge with individual inputs (OR of a trigger set vs a quorum on the count); fine count grid around the predicted quorum; the square lattice |
+| `ssb_fss.py` | finite-size scaling at the onset, $z=z_{\rm lo}+\lambda N^{-1/3}$ (cascades) |
+| `ssb_fssc.py` | cluster-exact finite-size scaling in simple contagion, $N=10^3$--$10^7$, against Aldous' excursion limit |
 | `ssb_theory.py` | closed forms (mixture of broken states, $P(\text{broken})$, residual groups) |
 | `ssb_analyze.py`, `ssb_func_analyze.py`, `ssb_gud_analyze.py`, `ssb_fss_analyze.py` | analysis and figures (`SSB_DATA`, `SSB_OUT` override the paths) |
 | `grouped_inputs.py`, `nonor_theory.py` | grouped inputs and the tree recursion for non-OR functions |

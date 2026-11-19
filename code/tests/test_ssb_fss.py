@@ -28,3 +28,13 @@ def test_z_grid():
     assert abs(sf.z_of(0.25, 1.0, 1000) - (1.114 + 0.1)) < 1e-9
     t = sf.tasks(smoke=True)
     assert all(len(x) == 6 for x in t)
+
+
+def test_cluster_exact_A_matches_monte_carlo():
+    import ssb_fssc as sc
+    rng = np.random.default_rng(3)
+    x = rng.dirichlet(np.ones(50) * 0.3)
+    m = x[rng.choice(len(x), size=(200000, sc.K), p=x)]
+    A_mc = ((m - m.mean(axis=1, keepdims=True)) ** 2).mean(axis=1).mean()
+    A_ex = (1 - 1 / sc.K) * ((x ** 3).sum() - ((x ** 2).sum()) ** 2)
+    assert abs(A_mc - A_ex) / A_ex < 0.02

@@ -9,9 +9,10 @@ Extensive field exp(x M_0/S... ) : with x = eps N,
     <M_0>_x = sum_{b0,K'} p(b0,K') M w / sum p w,  w = exp(x M),  M = S(b0 - (b0+K')/k),
     K' ~ Bin(k-1, S) inputs other than 0 in A.   x -> inf gives S(1-1/k).
 """
-from math import comb, factorial
+from math import ceil, comb, factorial
 
 import numpy as np
+from scipy.stats import poisson
 
 
 def S_er(z, iters=2000):
@@ -83,3 +84,27 @@ def stab_dist(S, k):
         s = factorial(K) * factorial(k - K)
         d[s] = d.get(s, 0) + comb(k, K) * S ** K * (1 - S) ** (k - K)
     return d
+
+
+def seeded_response(z, phi, rho0, blocked, dmax=80):
+    """Gleeson-Cahalane tree theory with ON seeds (fraction rho0) and blocked OFF inputs (fraction blocked):
+    final active fraction of the other nodes."""
+    d = np.arange(dmax + 1)
+    pd_ = poisson.pmf(d, z)
+    need = np.array([ceil(phi * x - 1e-9) if x > 0 else 10 ** 9 for x in d])
+    q = rho0
+    for _ in range(5000):
+        s = 0.0
+        for dd in range(1, dmax + 1):
+            m = np.arange(need[dd], dd)
+            if len(m):
+                s += dd * pd_[dd] / z * sum(comb(dd - 1, int(mm)) * q ** mm * (1 - q) ** (dd - 1 - mm) for mm in m)
+        qn = rho0 + (1 - rho0 - blocked) * s
+        if abs(qn - q) < 1e-12:
+            break
+        q = qn
+    f = 0.0
+    for dd in range(1, dmax + 1):
+        m = np.arange(need[dd], dd + 1)
+        f += pd_[dd] * sum(comb(dd, int(mm)) * q ** mm * (1 - q) ** (dd - mm) for mm in m)
+    return f

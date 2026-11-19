@@ -79,6 +79,51 @@ def run_upper(task):
                 resp=resp[:-1].astype(np.float32), resp_allon=float(resp[-1]))
 
 
+def cstar_theory(N, h, phi, z):
+    """Smallest count c whose seeded tree response reaches half the all-on response (bisection)."""
+    from ssb_theory import seeded_response
+    k = max(2, int(round(h * N)))
+    full = seeded_response(z, phi, k / N, 0.0)
+    lo, hi = 1, k
+    if seeded_response(z, phi, k / N, 0.0) < 0.1:
+        return None
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if seeded_response(z, phi, mid / N, (k - mid) / N) >= 0.5 * full:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+
+
+def run_upperfine(task):
+    """U1b: fine count grid around the predicted quorum c*, R_FINE random subsets per count."""
+    N, h, phi, z, seed, counts = task
+    rng = np.random.default_rng(seed)
+    k = max(2, int(round(h * N)))
+    src, dst = edge_sequence(N, int(round(z * N / 2)), rng)
+    A = adjacency(N, src, dst)
+    inputs = rng.choice(N, k, replace=False)
+    cols, cvals = [], []
+    for c in counts:
+        for _ in range(R_FINE):
+            on = np.zeros(k, bool)
+            on[rng.choice(k, c, replace=False)] = True
+            cols.append(on)
+            cvals.append(c)
+    cols.append(np.ones(k, bool))
+    P = np.stack(cols, axis=1)
+    mask = np.ones(N, bool)
+    mask[inputs] = False
+    X = np.concatenate([run_patterns(A, inputs, phi, P[:, s:s + 128]) for s in range(0, P.shape[1], 128)], axis=1)
+    resp = X[mask].mean(axis=0)
+    return dict(N=N, h=h, k=k, phi=phi, z=z, seed=seed, counts=np.array(cvals, np.int32),
+                resp=resp[:-1].astype(np.float32), resp_allon=float(resp[-1]))
+
+
+R_FINE = 16
+
+
 def run_lattice(task):
     L, p, seed = task
     rng = np.random.default_rng(seed)
@@ -94,6 +139,23 @@ def run_lattice(task):
 
 
 def grid(mode, smoke):
+    if mode == "upperfine":
+        cells = [(10000, 20), (30000, 10), (100000, 6)] if not smoke else [(3000, 2)]
+        zs = {0.25: (4.2, 4.6), 0.2: (6.2, 7.0)}
+        h = 0.02
+        tasks = []
+        i = 0
+        for N, R in cells:
+            for phi in zs:
+                for z in (zs[phi][:1] if smoke else zs[phi]):
+                    cs = cstar_theory(N, h, phi, z)
+                    k = max(2, int(round(h * N)))
+                    counts = np.unique(np.clip(np.round(cs * np.linspace(0.6, 1.4, 17)).astype(int), 1, k))
+                    for r in range(R):
+                        tasks.append((N, h, phi, z, 9 * 10 ** 12 + 1_000_003 * i + r, counts))
+                    i += 1
+        tasks.sort(key=lambda t: -t[0])
+        return tasks, run_upperfine
     if mode == "upper":
         zs = {0.25: (1.2, 1.5, 2.0, 2.5, 3.0, 3.5, 3.86, 4.2, 4.6, 5.0, 6.0),
               0.2: (1.5, 2.0, 3.0, 4.0, 5.0, 5.5, 5.76, 6.2, 7.0, 8.0, 9.0)}
@@ -119,7 +181,7 @@ def grid(mode, smoke):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["upper", "lattice"])
+    ap.add_argument("mode", choices=["upper", "lattice", "upperfine"])
     ap.add_argument("--out", required=True)
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
