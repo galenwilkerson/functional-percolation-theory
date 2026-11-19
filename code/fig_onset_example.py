@@ -245,15 +245,15 @@ def main():
     mc_a, mc_b = by_inputs(cls_a), by_inputs(cls_b)
 
     fig = plt.figure(figsize=(7.0, 5.0))
-    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.3, 1.0], hspace=0.42, wspace=0.12)
+    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.34, 1.0], hspace=0.42, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
     draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nevery connected node responds to $A$ or $B$",
                ring=inputs[:2],
-               sym="ringed: $A$ and $B$ both control the giant cascade\n"
+               sym="$A$ and $B$ both control the giant cascade (gold boxes)\n"
                    "swapping $A\\leftrightarrow B$ changes nothing: symmetric")
     draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nonly $A$ controls; $B$ is connected but inert",
                ring=inputs[:1],
-               sym="ringed: only $A$ controls the giant cascade\n"
+               sym="only $A$ controls the giant cascade (gold box)\n"
                    "swapping $A\\leftrightarrow B$ changes the function: broken")
 
     def key(ax, items):
@@ -264,6 +264,8 @@ def main():
                 h.append(Line2D([], [], marker="o", ls="", mfc=c_, mec=INK, mew=0.5, ms=5.5, label=l))
             elif kind == "input":
                 h.append(Line2D([], [], marker="s", ls="", color=INK, ms=5, label=l))
+            elif kind == "box":
+                h.append(Line2D([], [], marker="s", ls="", mfc="none", mec=C_RING, mew=1.6, ms=8, label=l))
             else:
                 h.append(Line2D([], [], ls="-", lw=1.2, color=c_, label=l))
         ax.legend(handles=h, loc="upper left", bbox_to_anchor=(-0.04, 1.0), ncol=2, fontsize=7.2, frameon=False, handletextpad=0.3,
@@ -271,12 +273,13 @@ def main():
     key(fig.add_subplot(gs[1, 0]), [
         ("node", C_AB, r"responds to $A$ or $B$ ($x_A\vee x_B$)"),
         ("node", C_ZERO, "never responds"),
-        ("input", INK, "input"),
-        ("edge", C_GCC, "giant component")])
+        ("input", INK, "input")])
     key(fig.add_subplot(gs[1, 1]), [
         ("node", C_OR, r"responds to $A$ only ($x_A$)"),
         ("node", C_NON, r"needs $A$ and $B$ ($x_A\wedge x_B$)"),
-        ("node", C_ZERO, "never responds")])
+        ("node", C_ZERO, "never responds"),
+        ("box", C_RING, "controls the giant cascade"),
+        ("edge", C_GCC, "giant component")])
 
     c = fig.add_subplot(gs[2, :])
     d = pd.read_csv(CONN)
