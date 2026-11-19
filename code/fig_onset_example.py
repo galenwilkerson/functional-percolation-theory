@@ -292,7 +292,7 @@ def main():
         c.text(Z, yv, lab, ha="center", va="center", fontsize=7.5, fontweight="bold", color=col, zorder=6)
     c.text(Z - 0.03, 0.03, f"$z={Z}$", ha="right", va="bottom", fontsize=8, color="0.25")
     c.set_xlim(0.2, 3.2)
-    c.set_ylim(0, 1.25)
+    c.set_ylim(0, 1.27)
     c.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
     c.set_xlabel("mean degree $z$ (average number of links per node)", fontsize=9)
     c.set_ylabel("probability that an input is\nconnected / controlling", fontsize=9)
@@ -301,9 +301,9 @@ def main():
     c.tick_params(labelsize=8)
     for sp in ("top", "right"):
         c.spines[sp].set_visible(False)
-    c.text(1.25, 1.0, "connected: input in the giant component, $S$\n(in simple contagion, also controlling)",
-           fontsize=7.6, color=C_GCC, ha="left", va="bottom")
-    c.text(2.05, 0.42, "controlling: input triggers a global\ncascade at $\\varphi=0.25$, $P_t$", fontsize=7.6,
+    c.text(1.3, 1.26, "connected: in the giant\ncomponent, $S$ (= controlling\nin simple contagion)",
+           fontsize=7.6, color=C_GCC, ha="left", va="top")
+    c.text(2.3, 0.45, "controlling: input triggers\na global cascade at\n$\\varphi=0.25$, $P_t$", fontsize=7.6,
            color=C_OR, ha="left", va="top")
 
     OUT.mkdir(parents=True, exist_ok=True)
