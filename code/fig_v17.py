@@ -103,7 +103,7 @@ def p_finiteh(ax):
     ax.set_xlabel("$z$")
     ax.set_ylabel("median anisotropy $A$")
     ax.legend(fontsize=7.6)
-    panel(ax, r"(d) input density $h=0.002$")
+    panel(ax, r"input density $h=0.002$, $\varphi=0.1$")
 
 
 def p_edge(ax, lab):
@@ -151,6 +151,38 @@ def fig_ssb4():
     plt.close(fig)
 
 
+def fig_ssb3():
+    """Main text: (a) grown network, (b) broken states, (c) broken by function vs connectivity, in one row."""
+    t = _prep(pd.read_parquet(DATA / "traj.parquet"))
+    s = _prep(pd.read_parquet(DATA / "tilt.parquet"))
+    fig, axs = plt.subplots(1, 3, figsize=(7.0, 2.9))
+    p_traj(axs[0], t)
+    p_atoms(axs[1], s)
+    p_func_conn(axs[2], s)
+    panel(axs[0], r"(a) commitment ($\varphi=0.1$)")
+    panel(axs[1], r"(b) broken states ($z=1.5$)")
+    axs[2].set_title(r"(c) controlling vs connected", loc="left", fontsize=8.4, color=INK)
+    # (b): one-column legend in the headroom above the atoms
+    axs[1].legend(fontsize=7.2, loc="upper right", ncol=1, handlelength=1.0, borderaxespad=0.1, labelspacing=0.2)
+    # (c): short labels
+    h, _ = axs[2].get_legend_handles_labels()
+    axs[2].legend(h, [r"controlling, $\varphi=0.25$", r"connected, $\varphi=0.25$", r"$\varphi=0.1$ (both)"],
+                  fontsize=7.2, loc="upper right", borderaxespad=0.1, labelspacing=0.2, handlelength=1.2)
+    axs[2].set_ylabel("broken networks, $k=3$")
+    fig.tight_layout(w_pad=0.5)
+    fig.savefig(OUT / "fig_ssb3.pdf")
+    plt.close(fig)
+
+
+def fig_finiteh_si():
+    """SM: single-input anisotropy at finite input density (zero-field observable)."""
+    fig, ax = plt.subplots(figsize=(3.4, 2.5))
+    p_finiteh(ax)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_finiteh_A_si.pdf")
+    plt.close(fig)
+
+
 def fig_ssb_si():
     fig, axs = plt.subplots(1, 2, figsize=(7.0, 2.7))
     p_edge(axs[0], r"(a) one added edge")
@@ -189,7 +221,8 @@ def fig_quorum_si():
 
 
 if __name__ == "__main__":
-    fig_ssb4()
+    fig_ssb3()
+    fig_finiteh_si()
     fig_ssb_si()
     fig_quorum_si()
     print("wrote", OUT)
