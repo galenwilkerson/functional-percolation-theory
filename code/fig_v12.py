@@ -139,7 +139,10 @@ def fig_ssb():
         ax.plot(zz, 1 - q ** 3 - (1 - q) ** 3, color=COL[i], lw=1.0, ls="--")
         d = s[(s.k == 3) & (s.phi == phi) & (s.N == 64000)]
         pb = d.groupby("z").K.apply(lambda K: float(K.between(1, 2).mean()))
-        ax.plot(pb.index, pb.values, MK[i], color=COL[i], ms=3.5, label=f"$\\varphi={phi}$")
+        nn = d.groupby("z").K.size()
+        se = np.sqrt(pb * (1 - pb) / nn)
+        ax.errorbar(pb.index, pb.values, yerr=se.values, fmt=MK[i], color=COL[i], ms=3.5, lw=0.8, capsize=1.5,
+                    label=f"$\\varphi={phi}$")
     ax.set_xlabel("$z$")
     ax.set_ylabel("$P(\\mathrm{broken})$, $k=3$")
     ax.legend(fontsize=6.3)
@@ -157,7 +160,7 @@ def fig_ssb():
     ax.plot(zb, 1 / (1 - zb), color=INK, lw=0.8, ls="--")
     ax.set_yscale("log")
     ax.set_xlabel("$z$")
-    ax.set_ylabel("$\\chi=N\\langle\\Delta m_0\\rangle$")
+    ax.set_ylabel("$\\chi_1=N\\langle\\Delta m_0\\rangle$")
     ax.legend(fontsize=6.3)
     panel(ax, r"(d) one added edge")
     # (e) finite input density
