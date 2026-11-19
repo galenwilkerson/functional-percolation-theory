@@ -64,7 +64,7 @@ def fig_phase_diagram():
     from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
     C_WIN, C_STRIP, C_HI = COL[0], "#f08a4b", "#8e5bb5"
-    fig, axs = plt.subplots(1, 2, figsize=(7.0, 3.35), gridspec_kw=dict(width_ratios=[1.45, 1]))
+    fig, axs = plt.subplots(1, 2, figsize=(7.0, 3.45), gridspec_kw=dict(width_ratios=[1.45, 1]))
     for ax, (xlo, xhi, logx) in zip(axs, ((0.5, 20.0, True), (0.95, 1.25, False))):
         for n in range(4, 21):
             p_lo, p_hi = 1 / (n + 1), 1 / n
@@ -94,16 +94,16 @@ def fig_phase_diagram():
         if len(s):
             axs[1].plot(z, 0.215, "s", ms=6, mfc=C_WIN if ok else C_STRIP, mec=INK, mew=0.8, zorder=5)
     panel(axs[1], r"(b) zoom near $z_c$")
-    hs = [Patch(color=C_WIN, alpha=0.3, label="cascade window: macroscopic function"),
-          Patch(color=C_STRIP, alpha=0.6, label="$z_c<z<z_{\\rm lo}$: connected, no macroscopic function"),
+    hs = [Patch(color=C_WIN, alpha=0.3, label="cascade window: macroscopic function, input symmetry broken"),
+          Patch(color=C_STRIP, alpha=0.6, label="$z_c<z<z_{\\rm lo}$: connected, no function, symmetric"),
           Line2D([], [], color=INK, lw=0.9, ls="--", label="$z_c=1$ (graph percolation)"),
           Line2D([], [], color=C_WIN, lw=2.4, label="$z_{\\rm lo}(\\varphi)$ (functional onset)"),
           Line2D([], [], color=C_HI, lw=2.4, label="$z_{\\rm hi}(\\varphi)$ (upper edge)"),
           Line2D([], [], ls="", marker="s", ms=6, mfc=C_STRIP, mec=INK, label="data: no input controls ($z=1.05$)"),
           Line2D([], [], ls="", marker="s", ms=6, mfc=C_WIN, mec=INK, label="data: every network broken ($z=1.2$)")]
-    fig.legend(handles=hs, loc="lower center", ncol=3, fontsize=7.8, frameon=False, bbox_to_anchor=(0.5, 0.0),
+    fig.legend(handles=hs, loc="lower center", ncol=2, fontsize=7.8, frameon=False, bbox_to_anchor=(0.5, 0.0),
                columnspacing=1.2, handlelength=1.6)
-    fig.tight_layout(rect=(0, 0.2, 1, 1))
+    fig.tight_layout(rect=(0, 0.23, 1, 1))
     fig.savefig(OUT / "fig_phase_diagram.pdf")
     plt.close(fig)
 
