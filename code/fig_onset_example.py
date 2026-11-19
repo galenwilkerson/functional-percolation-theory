@@ -27,9 +27,10 @@ OUT = Path(os.environ.get("FIG_OUT", HERE.parent / "figures"))
 CONN = Path(os.environ.get("CONN_CSV", HERE.parent / "summaries" / "ssb" / "f1_func_vs_conn.csv"))
 PHI = 0.25
 
-INK, MUTED = "#2b2a28", "#9a978f"
+INK, MUTED = "#2b2a28", "#5f5c56"
 C_GCC, C_EDGE = "#e07b39", "#8a877f"
-C_OR, C_NON, C_FIN, C_ZERO = "#2f6db5", "#c0392b", "#8fb3de", "#e4e2dc"
+C_OR, C_NON, C_FIN, C_ZERO = "#2f6db5", "#c0392b", "#6aa84f", "#e4e2dc"
+C_AB = "#8e5bb5"
 
 
 def fixed_point(G, inputs, x, phi=None):
@@ -156,33 +157,30 @@ def find_high(N=90, z=3.5, tries=4000):
 
 
 def layout(G):
-    """Largest component on the left (Kamada-Kawai) if it is big; the other components of size >= 2 in a column on
-    the right, or in a grid when there is no giant component; isolated nodes are not drawn."""
-    comps = sorted((c for c in nx.connected_components(G) if len(c) >= 2), key=len, reverse=True)
-    pos = {}
-    if len(comps[0]) >= 0.4 * G.number_of_nodes():
-        p = nx.kamada_kawai_layout(G.subgraph(comps[0]))
-        xs = np.array(list(p.values()))
-        lo, hi = xs.min(0), xs.max(0)
-        pos.update({u: (q - lo) / (hi - lo) * np.array([0.78, 1.0]) for u, q in p.items()})
-        y = 1.0
-        for c in comps[1:]:
-            h = 0.045 * math.sqrt(len(c))
-            sub = nx.spring_layout(G.subgraph(c), seed=1, scale=h)
-            pos.update({u: np.array([0.95, y - h]) + q for u, q in sub.items()})
-            y -= 2 * h + 0.06
-    else:
-        ncol = 4
-        for i, c in enumerate(comps):
-            h = 0.06 * math.sqrt(len(c))
-            sub = nx.kamada_kawai_layout(G.subgraph(c), scale=h) if len(c) > 2 else nx.spring_layout(
-                G.subgraph(c), seed=1, scale=h)
-            cx, cy = (i % ncol) / (ncol - 1), 1 - (i // ncol) * 0.26
-            pos.update({u: np.array([cx, cy]) + q for u, q in sub.items()})
-    return pos
+    """Graphviz neato positions (components packed), isolated nodes not drawn; scaled to the unit square."""
+    import subprocess
+    H = G.subgraph([u for u in G if G.degree(u) > 0])
+    lines = ["graph G {", "graph [pack=true, overlap=false, splines=false, sep=0.4, start=3];",
+             "node [shape=point, width=0.06];"]
+    lines += [f"{u};" for u in H.nodes()] + [f"{u} -- {v};" for u, v in H.edges()] + ["}"]
+    out = subprocess.run(["neato", "-Tplain"], input="\n".join(lines), capture_output=True, text=True,
+                         check=True).stdout
+    pos = {int(f[1]): np.array([float(f[2]), float(f[3])]) for f in (ln.split() for ln in out.splitlines())
+           if f and f[0] == "node"}
+    xs = np.array(list(pos.values()))
+    lo, hi = xs.min(0), xs.max(0)
+    span = (hi - lo).max()
+    return {u: (q - lo) / span for u, q in pos.items()}
 
 
-FILL = {"or": C_OR, "non": C_NON, "fin": C_FIN, "zero": C_ZERO}
+FILL = {"A": C_OR, "AB": C_AB, "non": C_NON, "C": C_FIN, "zero": C_ZERO, "other": "#b9b6ae"}
+
+
+def by_inputs(cls):
+    """Colour key from which inputs a node responds to: A, A or B, A and B (non-OR), C, none."""
+    key = {(0,): "A", (0, 1): "AB", (2,): "C"}
+    return {u: ("zero" if c[0] == "zero" else "non" if c[0] == "nonor" else key.get(c[1], "other"))
+            for u, c in cls.items()}
 
 
 def draw_graph(ax, G, inputs, mc, title, notes=()):
@@ -192,24 +190,24 @@ def draw_graph(ax, G, inputs, mc, title, notes=()):
     big = len(gcc) >= 0.4 * G.number_of_nodes()
     eg = [e for e in H.edges if big and e[0] in gcc]
     eo = [e for e in H.edges if e not in set(eg)]
-    nx.draw_networkx_edges(H, pos, edgelist=eo, ax=ax, width=0.9, edge_color=C_EDGE)
-    nx.draw_networkx_edges(H, pos, edgelist=eg, ax=ax, width=1.0, edge_color=C_GCC)
+    nx.draw_networkx_edges(H, pos, edgelist=eo, ax=ax, width=0.8, edge_color=C_EDGE)
+    nx.draw_networkx_edges(H, pos, edgelist=eg, ax=ax, width=0.9, edge_color=C_GCC)
     others = [u for u in H if u not in inputs]
     small = [u for u in others if mc[u] != "non"]
-    nx.draw_networkx_nodes(H, pos, nodelist=small, node_color=[FILL[mc[u]] for u in small], node_size=24,
+    nx.draw_networkx_nodes(H, pos, nodelist=small, node_color=[FILL[mc[u]] for u in small], node_size=18,
                            linewidths=0.5, edgecolors=INK, ax=ax)
     non = [u for u in others if mc[u] == "non"]
-    nx.draw_networkx_nodes(H, pos, nodelist=non, node_color=C_NON, node_size=50, linewidths=0.5,
+    nx.draw_networkx_nodes(H, pos, nodelist=non, node_color=C_NON, node_size=36, linewidths=0.5,
                            edgecolors=INK, ax=ax)
-    nx.draw_networkx_nodes(H, pos, nodelist=inputs, node_color=INK, node_shape="s", node_size=46, ax=ax)
+    nx.draw_networkx_nodes(H, pos, nodelist=inputs, node_color=INK, node_shape="s", node_size=40, ax=ax)
     for lab, u in zip("ABC", inputs):
         x, y = pos[u]
-        ax.text(x, y + 0.05, lab, ha="center", va="bottom", fontsize=8, fontweight="bold", color=INK)
+        ax.text(x, y + 0.035, lab, ha="center", va="bottom", fontsize=9, fontweight="bold", color=INK)
     for u, txt, dx, dy in notes:
         x, y = pos[u]
         ax.annotate(txt, (x, y), xytext=(x + dx, y + dy), fontsize=6.5, color=INK, ha="center",
                     arrowprops=dict(arrowstyle="-", lw=0.5, color=INK))
-    ax.set_title(title, fontsize=8.5, loc="left")
+    ax.set_title(title, fontsize=9, loc="left")
     ax.set_axis_off()
 
 
@@ -227,24 +225,38 @@ def main():
     pats, fa = functions(G, inputs, phi=0.1)
     assert max(dict(G.degree).values()) <= 10
     cls_a = {u: classify(t, pats) for u, t in fa.items()}
-    mc_a, mc_b = macro_classes(G, inputs, cls_a), macro_classes(G, inputs, cls_b)
+    mc_a, mc_b = by_inputs(cls_a), by_inputs(cls_b)
 
-    fig = plt.figure(figsize=(7.0, 4.9))
-    gs = fig.add_gridspec(3, 2, height_ratios=[1.3, 0.12, 1.0], hspace=0.32, wspace=0.12)
+    fig = plt.figure(figsize=(7.0, 5.2))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.42, 1.0], hspace=0.24, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
-    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nfunction = connectivity")
-    draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\n$B$ connected but not controlling")
+    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nevery connected node responds to $A$ or $B$")
+    draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nonly $A$ controls; $B$ is connected but inert",
+               notes=[(inputs[1], "$B$: connected, but\nswitches nothing on", 0.16, -0.24)])
 
     def key(ax, items):
         ax.set_axis_off()
-        h = [Line2D([], [], marker="o", ls="", mfc=c, mec=INK, mew=0.5, ms=ms, label=l) for c, ms, l in items]
-        ax.legend(handles=h, loc="upper center", ncol=len(h), fontsize=6.8, frameon=False, handletextpad=0.3,
-                  columnspacing=1.0, borderaxespad=0)
-    key(fig.add_subplot(gs[1, 0]), [(C_OR, 6, r"$x_A\vee x_B$"),
-                                    (C_FIN, 6, r"$x_C$"), (C_ZERO, 6, "zero")])
-    key(fig.add_subplot(gs[1, 1]), [(C_OR, 6, r"$x_A$"),
-                                    (C_NON, 8, r"$x_A\wedge x_B$"),
-                                    (C_FIN, 6, r"$x_C$"), (C_ZERO, 6, "zero")])
+        h = []
+        for kind, c_, l in items:
+            if kind == "node":
+                h.append(Line2D([], [], marker="o", ls="", mfc=c_, mec=INK, mew=0.5, ms=5.5, label=l))
+            elif kind == "input":
+                h.append(Line2D([], [], marker="s", ls="", color=INK, ms=5, label=l))
+            else:
+                h.append(Line2D([], [], ls="-", lw=1.2, color=c_, label=l))
+        ax.legend(handles=h, loc="upper left", bbox_to_anchor=(-0.04, 1.0), ncol=2, fontsize=7.2, frameon=False, handletextpad=0.3,
+                  columnspacing=0.7, borderaxespad=0, handlelength=1.2)
+    key(fig.add_subplot(gs[1, 0]), [
+        ("node", C_AB, r"responds to $A$ or $B$ ($x_A\vee x_B$)"),
+        ("node", C_FIN, r"responds to $C$ only"),
+        ("node", C_ZERO, "never responds"),
+        ("input", INK, "input"),
+        ("edge", C_GCC, "giant component")])
+    key(fig.add_subplot(gs[1, 1]), [
+        ("node", C_OR, r"responds to $A$ only ($x_A$)"),
+        ("node", C_NON, r"needs $A$ and $B$ ($x_A\wedge x_B$)"),
+        ("node", C_FIN, r"responds to $C$ only"),
+        ("node", C_ZERO, "never responds")])
 
     c = fig.add_subplot(gs[2, :])
     d = pd.read_csv(CONN)
@@ -252,41 +264,42 @@ def main():
     d["wf"], d["wc"] = d.q_func * d.n, d.q_conn * d.n
     g = d[np.isclose(d.phi, PHI)].groupby("z")[["wf", "wc", "n"]].sum()
     g["qf"], g["qc"] = g.wf / g.n, g.wc / g.n
-    zz = np.linspace(0.2, 4.4, 400)
+    zz = np.linspace(0.2, 3.2, 400)
     c.plot(zz, [_S(z) for z in zz], "-", color=C_GCC, lw=1.5,
-           label="in giant component, $S$ (= controls, simple contagion)")
+           label=r"connected: input in the giant component ($S$); in simple contagion also controlling")
     c.plot(zz, [watts.trigger_prob(z, PHI) for z in zz], "-", color=C_OR, lw=1.5,
-           label=r"controls the cascade, $P_t$")
+           label=r"controlling: input triggers a global cascade at $\varphi=0.25$ ($P_t$)")
     c.plot(g.index, g.qc, "o", color=C_GCC, ms=3.5, mfc="white")
     c.plot(g.index, g.qf, "s", color=C_OR, ms=3.5)
-    for zv in (1.0, 1.114, 3.863):
+    for zv in (1.0, 1.114):
         c.axvline(zv, color=MUTED, lw=0.7, ls="--")
-    c.text(0.98, 1.03, "$z_c$", ha="right", fontsize=7, color=MUTED)
-    c.text(1.14, 1.03, r"$z_{\rm lo}$", ha="left", fontsize=7, color=MUTED)
-    c.text(3.89, 1.03, r"$z_{\rm hi}$", ha="left", fontsize=7, color=MUTED)
+    c.text(0.98, 1.03, "$z_c$", ha="right", fontsize=8, color=MUTED)
+    c.text(1.14, 1.03, r"$z_{\rm lo}$", ha="left", fontsize=8, color=MUTED)
     c.axvline(Z, color="0.6", lw=0.6, zorder=0)
     for yv, lab, col in ((_S(Z), "a", C_GCC), (watts.trigger_prob(Z, PHI), "b", C_OR)):
         c.plot([Z], [yv], "o", ms=9, mfc="white", mec=col, mew=1.3, zorder=5)
-        c.text(Z, yv, lab, ha="center", va="center", fontsize=7, fontweight="bold", color=col, zorder=6)
-    c.text(Z, 1.12, f"$z={Z}$", ha="center", va="center", fontsize=7, color="0.3",
-           bbox=dict(fc="white", ec="none", pad=0.6))
-    c.set_xlim(0.2, 4.4)
-    c.set_ylim(0, 1.2)
-    c.set_xlabel("mean degree $z$", fontsize=8)
-    c.set_ylabel("probability per input", fontsize=8)
-    c.set_title(r"(c) $\varphi=0.25$: connectivity starts at $z_c$; function starts at $z_{\rm lo}$, stops at $z_{\rm hi}$",
-                fontsize=8.5, loc="left", pad=12)
-    c.tick_params(labelsize=7)
+        c.text(Z, yv, lab, ha="center", va="center", fontsize=7.5, fontweight="bold", color=col, zorder=6)
+    c.text(Z - 0.03, 0.03, f"$z={Z}$", ha="right", va="bottom", fontsize=8, color="0.25")
+    c.set_xlim(0.2, 3.2)
+    c.set_ylim(0, 1.25)
+    c.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+    c.set_xlabel("mean degree $z$ (average number of links per node)", fontsize=9)
+    c.set_ylabel("probability that an input is\nconnected / controlling", fontsize=9)
+    c.set_title(r"(c) inputs are connected from $z_c$ on, but control only from $z_{\rm lo}$ on, and not all of them",
+                fontsize=9, loc="left", pad=14)
+    c.tick_params(labelsize=8)
     for sp in ("top", "right"):
         c.spines[sp].set_visible(False)
-    c.legend(fontsize=6.5, frameon=False, loc="lower center", bbox_to_anchor=(0.62, 0.02))
+    c.text(1.25, 1.0, "connected: input in the giant component, $S$\n(in simple contagion, also controlling)",
+           fontsize=7.6, color=C_GCC, ha="left", va="bottom")
+    c.text(2.05, 0.42, "controlling: input triggers a global\ncascade at $\\varphi=0.25$, $P_t$", fontsize=7.6,
+           color=C_OR, ha="left", va="top")
 
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "fig_onset_example.pdf", bbox_inches="tight")
     fig.savefig(OUT / "fig_onset_example.png", dpi=170, bbox_inches="tight")
-    na = sum(v == "or" for v in mc_a.values()); nb = sum(v == "or" for v in mc_b.values())
-    print(f"seed={seed} gcc={len(gcc)} OR(a)={na} OR(b)={nb} nonOR(b)={sum(v == 'non' for v in mc_b.values())}",
-          {u: c_ for u, c_ in cls_a.items() if mc_a[u] == 'or'}.popitem()[1])
+    print("seed", seed, "a:", {k: list(mc_a.values()).count(k) for k in set(mc_a.values())},
+          "b:", {k: list(mc_b.values()).count(k) for k in set(mc_b.values())})
 
 
 if __name__ == "__main__":
