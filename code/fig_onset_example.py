@@ -232,8 +232,8 @@ def main():
     fig = plt.figure(figsize=(7.0, 4.9))
     gs = fig.add_gridspec(3, 2, height_ratios=[1.3, 0.12, 1.0], hspace=0.32, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
-    draw_graph(ga, G, inputs, mc_a, "(a) simple contagion ($\\varphi=0.1$)\nfunction = connectivity")
-    draw_graph(gb, G, inputs, mc_b, "(b) $\\varphi=0.25$, same graph\n$B$ connected but not controlling")
+    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nfunction = connectivity")
+    draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\n$B$ connected but not controlling")
 
     def key(ax, items):
         ax.set_axis_off()
@@ -254,9 +254,9 @@ def main():
     g["qf"], g["qc"] = g.wf / g.n, g.wc / g.n
     zz = np.linspace(0.2, 4.4, 400)
     c.plot(zz, [_S(z) for z in zz], "-", color=C_GCC, lw=1.5,
-           label="input in giant component, $S$ (controls, in simple contagion)")
+           label="in giant component, $S$ (= controls, simple contagion)")
     c.plot(zz, [watts.trigger_prob(z, PHI) for z in zz], "-", color=C_OR, lw=1.5,
-           label=r"input controls the cascade, $P_t$ ($\varphi=0.25$)")
+           label=r"controls the cascade, $P_t$")
     c.plot(g.index, g.qc, "o", color=C_GCC, ms=3.5, mfc="white")
     c.plot(g.index, g.qf, "s", color=C_OR, ms=3.5)
     for zv in (1.0, 1.114, 3.863):
@@ -265,13 +265,16 @@ def main():
     c.text(1.14, 1.03, r"$z_{\rm lo}$", ha="left", fontsize=7, color=MUTED)
     c.text(3.89, 1.03, r"$z_{\rm hi}$", ha="left", fontsize=7, color=MUTED)
     c.axvline(Z, color="0.6", lw=0.6, zorder=0)
-    c.text(Z, 1.12, "(a, b)", ha="center", va="center", fontsize=7.5, color="0.3",
+    for yv, lab, col in ((_S(Z), "a", C_GCC), (watts.trigger_prob(Z, PHI), "b", C_OR)):
+        c.plot([Z], [yv], "o", ms=9, mfc="white", mec=col, mew=1.3, zorder=5)
+        c.text(Z, yv, lab, ha="center", va="center", fontsize=7, fontweight="bold", color=col, zorder=6)
+    c.text(Z, 1.12, f"$z={Z}$", ha="center", va="center", fontsize=7, color="0.3",
            bbox=dict(fc="white", ec="none", pad=0.6))
     c.set_xlim(0.2, 4.4)
     c.set_ylim(0, 1.2)
     c.set_xlabel("mean degree $z$", fontsize=8)
     c.set_ylabel("probability per input", fontsize=8)
-    c.set_title(r"(c) connectivity starts at $z_c$; function starts at $z_{\rm lo}$ and stops at $z_{\rm hi}$",
+    c.set_title(r"(c) $\varphi=0.25$: connectivity starts at $z_c$; function starts at $z_{\rm lo}$, stops at $z_{\rm hi}$",
                 fontsize=8.5, loc="left", pad=12)
     c.tick_params(labelsize=7)
     for sp in ("top", "right"):
