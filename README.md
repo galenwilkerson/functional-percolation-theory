@@ -1,6 +1,6 @@
 # Functional percolation: theory
 
-Code and summary data for G. J. Wilkerson, *Statistical Mechanics of Functional Percolation: Input-Driven Response in Network Cascades*.
+Code and summary data for G. J. Wilkerson, *Statistical Mechanics of Functional Percolation: Percolation and Input-Symmetry Breaking in Network Cascades*.
 
 Linear-threshold cascades on Erdős–Rényi graphs and the 2D square lattice. With k input nodes clamped,
 each node's final state is a Boolean function of the inputs; the code computes these functions exactly
@@ -91,7 +91,7 @@ The paper (in preparation):
 ```bibtex
 @unpublished{Wilkerson2026FunctionalPercolation,
   author = {Wilkerson, Galen J.},
-  title  = {Statistical Mechanics of Functional Percolation: Input-Driven Response in Network Cascades},
+  title  = {Statistical Mechanics of Functional Percolation: Percolation and Input-Symmetry Breaking in Network Cascades},
   year   = {2026},
   note   = {Paper in preparation}
 }
