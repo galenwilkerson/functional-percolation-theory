@@ -100,7 +100,7 @@ def analyze():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.right": False, "legend.frameon": False})
+    plt.rcParams.update({"font.size": 9.5, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 7.8, "axes.spines.top": False, "axes.spines.right": False, "legend.frameon": False})
     fig, axs = plt.subplots(1, 3, figsize=(7.2, 2.4))
     for col, (obs, (a0, th, lab)) in enumerate(sa.OBS.items()):
         ax = axs[col]
@@ -111,7 +111,7 @@ def analyze():
         ax.set_yscale("log")
         ax.set_xlabel(r"$\lambda=(z-1)N^{1/3}$")
         ax.set_ylabel(lab)
-    axs[0].legend(fontsize=5.5)
+    axs[0].legend(fontsize=7.6)
     fig.suptitle("SC-c: cluster-exact placement averages, simple contagion, $k=3$; approach to the Aldous limit",
                  fontsize=7.5)
     fig.tight_layout()

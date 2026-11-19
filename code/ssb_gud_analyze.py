@@ -25,7 +25,7 @@ PFX = os.environ.get("SSB_PREFIX", "")
 if PFX:
     OUT = OUT / "smoke"
     OUT.mkdir(parents=True, exist_ok=True)
-plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.right": False, "legend.frameon": False})
+plt.rcParams.update({"font.size": 9.5, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 7.8, "axes.spines.top": False, "axes.spines.right": False, "legend.frameon": False})
 KEY = {}
 
 
@@ -61,7 +61,7 @@ for r, phi in enumerate((0.1, 0.25)):
         ax.axvline(1.0 if phi == 0.1 else 1.114, color="gray", lw=0.4)
 for ax in axs[1]:
     ax.set_xlabel("$z$")
-axs[0, 0].legend(fontsize=5)
+axs[0, 0].legend(fontsize=7.6)
 fig.suptitle("G: finite input density. The symmetry-breaking order parameter stays sharp at the onset; the "
              "responsive fraction is rounded by the field", fontsize=7.5)
 fig.tight_layout()
@@ -126,11 +126,11 @@ for r, phi in enumerate((0.25, 0.2)):
             ax.plot(cur.index, cur.values, "o-" if N == 100000 else "o--", ms=2, lw=0.8,
                     color="C0" if h == 0.005 else "C3", label=f"h={h}, N={N}")
         ax.set_xscale("log")
-        ax.set_title(f"$\\varphi={phi}$, $z={z}$", fontsize=7)
+        ax.set_title(f"$\\varphi={phi}$, $z={z}$", fontsize=8)
         if r == 1:
             ax.set_xlabel("fraction of inputs on, $c/k$")
     axs[r, 0].set_ylabel("P(global response)")
-axs[0, 0].legend(fontsize=5)
+axs[0, 0].legend(fontsize=7.6)
 fig.suptitle("U1: inside the window any trigger input suffices (OR); past $z_{hi}$ the network fires only above a "
              "count of ON inputs", fontsize=7.5)
 fig.tight_layout()
@@ -160,8 +160,8 @@ for Ls, s in DL.groupby("L"):
 ax.axvline(0.5, color="gray", lw=0.4)
 ax.set_xlabel("bond probability $p$")
 ax.set_ylabel("P(broken), $k=3$")
-ax.legend(fontsize=6)
-ax.set_title("D4: square lattice; dotted $1-P_\\infty^3-(1-P_\\infty)^3$", fontsize=7)
+ax.legend(fontsize=7.6)
+ax.set_title("D4: square lattice; dotted $1-P_\\infty^3-(1-P_\\infty)^3$", fontsize=8)
 fig.tight_layout()
 fig.savefig(OUT / "fig_d4_lattice.pdf")
 plt.close(fig)
@@ -204,10 +204,10 @@ if fp.exists():
             cur = pd.DataFrame(recs).groupby("c").p.mean()
             ax.plot(cur.index / cs, cur.values, "o-", ms=2, lw=0.8, label=f"N={N}")
         ax.axvline(1, color="gray", lw=0.4)
-        ax.set_title(f"$\\varphi={phi}$, $z={z}$", fontsize=7)
+        ax.set_title(f"$\\varphi={phi}$, $z={z}$", fontsize=8)
         ax.set_xlabel("$c/c^*_{\\rm theory}$")
     axs[0].set_ylabel("P(global response)")
-    axs[0].legend(fontsize=5.5)
+    axs[0].legend(fontsize=7.6)
     fig.tight_layout()
     fig.savefig(OUT / "fig_u1b_quorum.pdf")
     plt.close(fig)

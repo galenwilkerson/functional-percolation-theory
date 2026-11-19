@@ -34,14 +34,14 @@ ALDOUS = Path(os.environ.get("ALDOUS_CSV", HERE.parent / "summaries" / "aldous" 
 COL = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#7d4fc2"]
 MK = ["o", "s", "^", "D", "v"]
 INK = "#0b0b0b"
-plt.rcParams.update({"font.size": 8.5, "axes.spines.top": False, "axes.spines.right": False,
+plt.rcParams.update({"font.size": 9.5, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 8, "axes.spines.top": False, "axes.spines.right": False,
                      "axes.edgecolor": "#52514e", "axes.labelcolor": INK, "xtick.color": "#52514e",
                      "ytick.color": "#52514e", "legend.frameon": False, "lines.linewidth": 1.2,
                      "axes.grid": True, "grid.color": "#e6e5e1", "grid.linewidth": 0.5})
 
 
 def panel(ax, t):
-    ax.set_title(t, loc="left", fontsize=8.5, color=INK)
+    ax.set_title(t, loc="left", fontsize=9.5, color=INK)
 
 
 def nlab(N):
@@ -58,15 +58,15 @@ def z_hi_n(n):
 
 # ============================================================================ phase diagram
 def fig_phase_diagram():
-    fig, axs = plt.subplots(1, 2, figsize=(7.0, 2.8), gridspec_kw=dict(width_ratios=[1.6, 1]))
+    fig, axs = plt.subplots(1, 2, figsize=(7.0, 3.0), gridspec_kw=dict(width_ratios=[1.45, 1]))
     for ax, (xlo, xhi, logx) in zip(axs, ((0.5, 20.0, True), (0.95, 1.25, False))):
         for n in range(4, 21):
             p_lo, p_hi = 1 / (n + 1), 1 / n
             zl, zh = z_lo_n(n), z_hi_n(n)
             ax.fill_betweenx([p_lo, p_hi], zl, zh, color=COL[0], alpha=0.18, lw=0)
             ax.fill_betweenx([p_lo, p_hi], 1.0, zl, color=COL[1], alpha=0.35, lw=0)
-            ax.plot([zl, zl], [p_lo, p_hi], color=COL[0], lw=1.4)
-            ax.plot([zh, zh], [p_lo, p_hi], color=COL[3], lw=1.4)
+            ax.plot([zl, zl], [p_lo, p_hi], color=COL[0], lw=2.4)
+            ax.plot([zh, zh], [p_lo, p_hi], color=COL[3], lw=2.4)
         ax.axvline(1.0, color=INK, lw=0.9, ls="--")
         ax.set_xlim(xlo, xhi)
         ax.set_ylim(0.04, 0.3)
@@ -74,24 +74,23 @@ def fig_phase_diagram():
             ax.set_xscale("log")
         ax.set_xlabel("mean degree $z$")
     axs[0].set_ylabel(r"threshold $\varphi$")
-    axs[0].text(1.04, 0.285, "$z_c=1$", fontsize=7.5)
-    axs[0].text(2.3, 0.12, "cascade window:\nmacroscopic function", fontsize=7.5, color=COL[0])
-    axs[0].text(7.0, 0.27, "no window ($\\varphi>1/4$)", fontsize=7, color="#52514e")
-    axs[0].annotate("$z_{\\rm hi}(\\varphi)$", xy=(5.76, 0.18), xytext=(9.0, 0.21), fontsize=7.5, color=COL[3],
+    axs[0].text(1.04, 0.285, "$z_c=1$", fontsize=8.8)
+    axs[0].text(1.35, 0.11, "cascade window:\nmacroscopic function", fontsize=8.8, color=COL[0])
+    axs[0].text(5.0, 0.272, "no window ($\\varphi>1/4$)", fontsize=8.3, color="#52514e")
+    axs[0].annotate("$z_{\\rm hi}(\\varphi)$", xy=(5.76, 0.18), xytext=(8.5, 0.215), fontsize=8.8, color=COL[3],
                     arrowprops=dict(arrowstyle="-", color=COL[3], lw=0.6))
     panel(axs[0], r"(a) functional phase diagram")
     # zoom: the strip between z_c and z_lo
-    axs[1].text(1.125, 0.243, "$n=4$ ($\\varphi\\in(0.2,0.25]$): $z_{\\rm lo}=1.114$", fontsize=6.5)
-    axs[1].text(1.03, 0.183, "$n=5$: $z_{\\rm lo}=1.021$", fontsize=6.5)
-    axs[1].text(1.03, 0.093, "$n=10$ ($\\varphi=0.1$): $z_{\\rm lo}=1.000$", fontsize=6.5)
-    axs[1].text(0.953, 0.272, "connected,\nno macroscopic\nfunction", fontsize=6.5, color=COL[1])
-    axs[1].annotate("", xy=(1.03, 0.23), xytext=(0.985, 0.262), arrowprops=dict(arrowstyle="->", color=COL[1], lw=0.7))
+    axs[1].text(1.122, 0.24, "$n=4$: $z_{\\rm lo}=1.114$", fontsize=8)
+    axs[1].text(1.03, 0.183, "$n=5$: $z_{\\rm lo}=1.021$", fontsize=8)
+    axs[1].text(1.03, 0.093, "$n=10$: $z_{\\rm lo}=1.000$", fontsize=8)
+    axs[1].text(1.105, 0.272, "connected,\nno function", fontsize=8, color=COL[1], va="center")
+    axs[1].annotate("", xy=(1.06, 0.24), xytext=(1.103, 0.268), arrowprops=dict(arrowstyle="->", color=COL[1], lw=0.8))
     g = pd.read_csv(RES / "g_finiteh.csv")
     for (z, ok) in ((1.05, False), (1.2, True)):
         s = g[(g.phi == 0.25) & (g.h == 0.002) & (g.N == 100000) & np.isclose(g.z, z)]
         if len(s):
             axs[1].plot(z, 0.215, MK[1], ms=5, mfc="white" if not ok else COL[0], mec=INK, mew=0.8, zorder=5)
-    axs[1].text(1.125, 0.226, "data, $\\varphi=0.25$, $N=10^5$", fontsize=6.3)
     panel(axs[1], r"(b) zoom near $z_c$")
     fig.tight_layout()
     fig.savefig(OUT / "fig_phase_diagram.pdf")

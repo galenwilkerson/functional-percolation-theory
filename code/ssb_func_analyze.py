@@ -15,7 +15,7 @@ OUT = Path(os.environ.get("SSB_OUT", HERE.parent / "summaries" / "ssb"))
 DATA = Path(os.environ.get("SSB_DATA", HERE.parent / "data" / "ssb"))
 ALDOUS = Path(os.environ.get("ALDOUS_CSV", HERE.parent / "summaries" / "aldous" / "aldous_moments.csv"))
 OUT.mkdir(parents=True, exist_ok=True)
-plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.right": False,
+plt.rcParams.update({"font.size": 9.5, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 7.8, "axes.spines.top": False, "axes.spines.right": False,
                      "legend.frameon": False})
 NCOL = {4000: "C0", 16000: "C2", 64000: "C3"}
 KEY = {}
@@ -50,7 +50,7 @@ for c_, phi in enumerate((0.1, 0.2, 0.25)):
     axs[1, c_].set_xlabel("$z$")
 axs[0, 0].set_ylabel("P(broken)")
 axs[1, 0].set_ylabel("mean anisotropy $A$")
-axs[0, 0].legend(fontsize=5)
+axs[0, 0].legend(fontsize=7.6)
 fig.tight_layout()
 fig.savefig(OUT / "fig_f1_func_vs_conn.pdf")
 plt.close(fig)
@@ -81,7 +81,7 @@ for ax, z in zip(axs, (1.5, 2.0, 3.0)):
     ax.set_title(f"$z={z}$")
     ax.set_xlabel("$N$ ($k=hN$)")
 axs[0].set_ylabel("share of nodes on non-symmetric\nmacroscopic functions")
-axs[0].legend(fontsize=5.5)
+axs[0].legend(fontsize=7.6)
 fig.tight_layout()
 fig.savefig(OUT / "fig_f2_density.pdf")
 plt.close(fig)

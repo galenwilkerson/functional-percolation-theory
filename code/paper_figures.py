@@ -35,7 +35,7 @@ D = Path(os.environ.get("FP_DATA", HERE.parent / "summaries"))  # summary tables
 COL = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
 MK = ["o", "s", "^", "D"]
 INK = "#0b0b0b"
-plt.rcParams.update({"font.size": 8.5, "axes.spines.top": False, "axes.spines.right": False,
+plt.rcParams.update({"font.size": 9.5, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 7.8, "axes.spines.top": False, "axes.spines.right": False,
                      "axes.edgecolor": "#52514e", "axes.labelcolor": INK, "xtick.color": "#52514e",
                      "ytick.color": "#52514e", "legend.frameon": False, "lines.linewidth": 1.2,
                      "axes.grid": True, "grid.color": "#e6e5e1", "grid.linewidth": 0.5})
@@ -80,8 +80,8 @@ def fig_fss():
     ax[1].set_ylabel(r"$g(\lambda)=\bar s_N/N^{1/3}$")
     panel(ax[0], "(a) points: measured; solid: same-graph; dashed: Aldous")
     panel(ax[1], "(b) structural mean cluster size")
-    ax[0].legend(fontsize=7)
-    ax[1].legend(fontsize=7, ncol=2)
+    ax[0].legend(fontsize=8)
+    ax[1].legend(fontsize=8, ncol=2)
     fig.tight_layout()
     fig.savefig(OUT / "fig_fss.pdf")
 
@@ -100,7 +100,7 @@ def fig_fluct():
     ax.set_xlabel("$z$")
     ax.set_ylabel(r"$\mathrm{Var}(c_G)$")
     panel(ax, "sample fluctuations ($k=5$)")
-    ax.legend(fontsize=7)
+    ax.legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(OUT / "fig_fluct.pdf")
 
@@ -128,8 +128,8 @@ def fig_diversity():
         a.set_xlim(0.3, 3.2)
     panel(ax[0], r"(a) OR regime, $\varphi=0.1$, $N=10^5$")
     panel(ax[1], r"(b) finite threshold, $k=5$, $N=10^5$")
-    ax[0].legend(fontsize=7)
-    ax[1].legend(fontsize=7)
+    ax[0].legend(fontsize=8)
+    ax[1].legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(OUT / "fig_diversity.pdf")
 
@@ -162,8 +162,8 @@ def fig_growing_k():
     ax[1].set_ylabel(r"measured $\mathbb{E}[m_i\mid\mathrm{on}]$, $q_{\rm emp}$")
     panel(ax[0], r"(a) complexity below $z_c$ ($z=0.5,0.8,0.9$)")
     panel(ax[1], r"(b) relevance sectors above $z_c$ ($z=1.5,2$)")
-    ax[0].legend(fontsize=7)
-    ax[1].legend(fontsize=7)
+    ax[0].legend(fontsize=8)
+    ax[1].legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(OUT / "fig_growing_k.pdf")
 
@@ -184,7 +184,7 @@ def fig_selection():
     ax[1].set_ylabel(r"anisotropy $A=\mathrm{Var}_i\,m_i$")
     panel(ax[0], r"(a) lines: $S\,S_{\rm in}$ ($k=5$, $N=10^6$)")
     panel(ax[1], r"(b) lines: $S^2S_{\rm in}(1-S_{\rm in})(1-1/k)$")
-    ax[0].legend(fontsize=7)
+    ax[0].legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(OUT / "fig_selection.pdf")
 
@@ -219,8 +219,8 @@ def fig_order():
     panel(ax[0], r"(a) lines: $S[1-(1-S)^k]$")
     panel(ax[1], r"(b) complexity per input")
     panel(ax[2], r"(c) subcritical, all cells")
-    ax[0].legend(fontsize=7)
-    ax[1].legend(fontsize=7)
+    ax[0].legend(fontsize=8)
+    ax[1].legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(OUT / "fig_order.pdf")
 
@@ -261,9 +261,9 @@ def fig_symmetry():
     panel(ax[0], r"(a) lines: $S^3(1-S)(1-1/k)$")
     panel(ax[1], r"(b) two sectors ($N=10^5$)")
     panel(ax[2], r"(c) wiring vs placement")
-    ax[0].legend(fontsize=6.5)
-    ax[1].legend(fontsize=6.5, loc="center right")
-    ax[2].legend(fontsize=6.5, loc="center right")
+    ax[0].legend(fontsize=7.6)
+    ax[1].legend(fontsize=7.6, loc="center right")
+    ax[2].legend(fontsize=7.6, loc="center right")
     fig.tight_layout()
     fig.savefig(OUT / "fig_symmetry.pdf")
 
@@ -281,7 +281,7 @@ def fig_kS():
     ax.loglog(x, 1 - np.exp(-x), "-", color="#52514e", lw=1.0, label=r"$1-e^{-y}$")
     ax.set_xlabel(r"$y=-k\ln(1-S)$")
     ax.set_ylabel(r"$\Psi/S$")
-    ax.legend(fontsize=6.5)
+    ax.legend(fontsize=7.6)
     fig.tight_layout()
     fig.savefig(OUT / "fig_kS.pdf")
 
@@ -322,7 +322,7 @@ def fig_field_v3():
         ax[0].plot(zz, th, "-", color=COL[i], lw=0.7)
     ax[0].set_xlabel("$z$")
     ax[0].set_ylabel(r"$\Psi$")
-    ax[0].legend(fontsize=5.5, loc="upper left")
+    ax[0].legend(fontsize=7.6, loc="upper left")
     # (b) linear response below z_c
     for i, N in enumerate(NS):
         t = f[(f.N == N) & (f.z < 0.99) & (f.law == "rho")]
@@ -334,7 +334,7 @@ def fig_field_v3():
     ax[1].loglog(x, x, "-", color=INK, lw=0.8)
     ax[1].set_xlabel(r"$z/(1-z)$")
     ax[1].set_ylabel(r"$\Psi/h$")
-    ax[1].legend(fontsize=5.5)
+    ax[1].legend(fontsize=7.6)
     # (c) critical isotherm
     for i, N in enumerate(NS):
         t = f[(f.N == N) & (abs(f.z - 1) < 1e-9)]
@@ -346,7 +346,7 @@ def fig_field_v3():
     ax[2].loglog(hh, np.sqrt(2 * hh), "--", color=INK, lw=0.7, label=r"$\sqrt{2h}$")
     ax[2].set_xlabel("$h=k/N$")
     ax[2].set_ylabel(r"$\Psi(z=1)$")
-    ax[2].legend(fontsize=5.5)
+    ax[2].legend(fontsize=7.6)
     # (d) scaled-field collapse
     for j, c in enumerate([0.3, 1.0, 10.0]):
         for i, N in enumerate(NS):
@@ -355,7 +355,7 @@ def fig_field_v3():
                            label=(f"$c={c:g}$" if i == 3 else None))
     ax[3].set_xlabel(r"$\lambda=(z-1)N^{1/3}$")
     ax[3].set_ylabel(r"$\Psi N^{1/3}$")
-    ax[3].legend(fontsize=5.5)
+    ax[3].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a)", "(b)", "(c)", "(d)"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.6)
@@ -385,8 +385,8 @@ def fig_fss_v3():
         a.set_xlabel(r"$\lambda=(z-1)N^{1/3}$")
     ax[1].set_yscale("log")
     ax[2].set_yscale("log")
-    ax[0].legend(fontsize=6)
-    ax[2].legend(fontsize=6)
+    ax[0].legend(fontsize=7.6)
+    ax[2].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a) order parameter", "(b) functional response", "(c) mean cluster size"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.6)
@@ -429,8 +429,8 @@ def fig_composites_v3():
     ax[1].set_ylabel(r"$H_N$")
     ax[2].set_ylabel(r"$G_2$")
     ax[3].set_ylabel(r"$\mathrm{Var}(c_G)$")
-    ax[0].legend(fontsize=5.5)
-    ax[3].legend(fontsize=5.5)
+    ax[0].legend(fontsize=7.6)
+    ax[3].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a) complexity/input", "(b) entropy", "(c) two-point", "(d) fluctuations"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.5)
@@ -477,8 +477,8 @@ def fig_lattice_v4():
     ax[2].set_xlabel(r"$(p-p_c)L^{3/4}$")
     ax[2].set_ylabel(r"$(C_N/k)\,L^{5/24}$")
     ax[2].set_xlim(-30, 60)
-    ax[0].legend(fontsize=5.5)
-    ax[1].legend(fontsize=6)
+    ax[0].legend(fontsize=7.6)
+    ax[1].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a) $C_N/k=P_\\infty^2$ ($p\\geq p_c$)", "(b) 2D exponents at $p_c$", "(c) collapse"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.6)
@@ -507,7 +507,7 @@ def fig_dtc_v4():
         a.set_xlabel("decision-tree complexity $j$")
         panel(a, f"$z={z:g}$ ($S={r.S_th:.3f}$)")
     ax[0].set_ylabel(r"$\Pr[C_{\rm DT}=j]$")
-    ax[0].legend(fontsize=6, loc="lower left")
+    ax[0].legend(fontsize=7.6, loc="lower left")
     fig.tight_layout(w_pad=0.4)
     fig.savefig(OUT / "fig_dtc.pdf")
 
@@ -551,9 +551,9 @@ def fig_finiteh_v5():
     ax[1].set_ylabel(r"$C_N/k$ ($h=0.1$)")
     ax[2].set_xlabel("$z$")
     ax[2].set_ylabel(r"$C_N/k$ ($\varphi=0.25$)")
-    ax[0].legend(fontsize=5.5)
-    ax[1].legend(fontsize=5.5)
-    ax[2].legend(fontsize=5.5)
+    ax[0].legend(fontsize=7.6)
+    ax[1].legend(fontsize=7.6)
+    ax[2].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a) finite input density", "(b) sharp in $N$", "(c) non-exact case"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.6)
@@ -576,7 +576,7 @@ def fig_fss_v5():
     ax[1].set_ylabel(r"$\Psi_N N^{2/3}/k$")
     for a in ax:
         a.set_xlabel(r"$\lambda$")
-    ax[0].legend(fontsize=5)
+    ax[0].legend(fontsize=7.6)
     panel(ax[0], "(a)")
     panel(ax[1], "(b)")
     fig.tight_layout(w_pad=0.4)
@@ -668,7 +668,7 @@ def fig_phase_onset_v6():
                                linewidth=0)
         a.set_xscale("log")
         a.set_yticks(range(len(phis)))
-        a.set_yticklabels([f"{p:g}" for p in phis], fontsize=6)
+        a.set_yticklabels([f"{p:g}" for p in phis], fontsize=7.6)
         a.set_xlabel("$z$")
         a.set_ylabel(r"$\varphi$")
         a.axvline(1.0, color=INK, lw=0.6)
@@ -733,7 +733,7 @@ def fig_composites3_v7():
     ax[0].set_ylabel(r"$C_N/k$")
     ax[1].set_ylabel(r"$H_N$")
     ax[2].set_ylabel(r"$G_2$")
-    ax[0].legend(fontsize=5.5)
+    ax[0].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a)", "(b)", "(c)"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.5)
@@ -769,7 +769,7 @@ def fig_info_v8():
         a.set_xlabel("$z$")
     ax[0].set_ylabel("$J/k$ (bits)")
     ax[1].set_ylabel("$I$ (bits)")
-    ax[0].legend(fontsize=5.5)
+    ax[0].legend(fontsize=7.6)
     for i, L in enumerate([128, 256, 512, 1024]):
         g = lat[lat.L == L].sort_values("p")
         ax[2].plot(g.p, g.J / 8, "-" + MK[i], ms=2.0, lw=0.6, color=COL[i], label=f"$L={L}$")
@@ -777,7 +777,7 @@ def fig_info_v8():
     ax[2].set_xlim(0.3, 0.8)
     ax[2].set_xlabel("$p$")
     ax[2].set_ylabel("$J/k$ (bits)")
-    ax[2].legend(fontsize=5.5)
+    ax[2].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a)", "(b)", "(c)"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.6)
@@ -916,16 +916,16 @@ def fig_schematic_v9(layout="neato", fname="fig_schematic.pdf", gvstyle=False):
             ax2.bar(i, max(wi, 0.008), width=0.6, color=ci, edgecolor="none")
         ax2.grid(False)
         ax2.set_xticks(range(3))
-        ax2.set_xticklabels(labels, fontsize=7)
+        ax2.set_xticklabels(labels, fontsize=8)
         ax2.set_ylim(0, 1.12)
         ax2.set_xlim(-0.6, 2.6)
         if col == 0:
             ax2.set_ylabel("weight", fontsize=7.5)
         else:
             ax2.set_yticklabels([])
-            ax2.text(0, 1 - S + 0.06, r"$1-S$", ha="center", fontsize=6.5)
-            ax2.text(1, S + 0.06, r"$S$", ha="center", fontsize=6.5)
-        ax2.text(2, 0.06, r"$O(k/N)$", ha="center", fontsize=6)
+            ax2.text(0, 1 - S + 0.06, r"$1-S$", ha="center", fontsize=7.6)
+            ax2.text(1, S + 0.06, r"$S$", ha="center", fontsize=7.6)
+        ax2.text(2, 0.06, r"$O(k/N)$", ha="center", fontsize=7.6)
         ax2.set_xlabel("function", fontsize=7.5)
         panel(ax2, "(c)" if col == 0 else "(d)")
     fig.savefig(OUT / fname, bbox_inches="tight")
@@ -951,7 +951,7 @@ def fig_info_si_v9():
         a.set_xlabel("$z$")
     ax[0].set_ylabel("$J/k$ (bits)")
     ax[1].set_ylabel("$I$ (bits)")
-    ax[0].legend(fontsize=5.5)
+    ax[0].legend(fontsize=7.6)
     for a, t in zip(ax, ["(a)", "(b)"]):
         panel(a, t)
     fig.tight_layout(w_pad=0.6)
@@ -1014,16 +1014,16 @@ def fig_schematic_gviz(fname="fig_schematic_gviz.pdf", engine="neato"):
             ax2.bar(i, max(wi, 0.008), width=0.6, color=ci, edgecolor="none")
         ax2.grid(False)
         ax2.set_xticks(range(3))
-        ax2.set_xticklabels(["0", "OR", "other"], fontsize=7)
+        ax2.set_xticklabels(["0", "OR", "other"], fontsize=8)
         ax2.set_ylim(0, 1.12)
         ax2.set_xlim(-0.6, 2.6)
         if col == 0:
             ax2.set_ylabel("weight", fontsize=7.5)
         else:
             ax2.set_yticklabels([])
-            ax2.text(0, 1 - S + 0.06, r"$1-S$", ha="center", fontsize=6.5)
-            ax2.text(1, S + 0.06, r"$S$", ha="center", fontsize=6.5)
-        ax2.text(2, 0.06, r"$O(k/N)$", ha="center", fontsize=6)
+            ax2.text(0, 1 - S + 0.06, r"$1-S$", ha="center", fontsize=7.6)
+            ax2.text(1, S + 0.06, r"$S$", ha="center", fontsize=7.6)
+        ax2.text(2, 0.06, r"$O(k/N)$", ha="center", fontsize=7.6)
         ax2.set_xlabel("function", fontsize=7.5)
         panel(ax2, "(c)" if col == 0 else "(d)")
     fig.savefig(OUT / fname, bbox_inches="tight", dpi=500)
@@ -1103,7 +1103,7 @@ def fig_schematic3_v9(fname="fig_schematic3.pdf"):
     ax2.plot(zz, Sz * (1 - (1 - Sz) ** 3), "--", color=INK, lw=0.8, label=r"$N\to\infty$")
     for zc, lab in ((0.5, "(a)"), (1.0, "(b)"), (1.9, "(c)")):
         ax2.axvline(zc, color="0.6", lw=0.5, zorder=0)
-        ax2.text(zc, 0.86, lab, ha="center", fontsize=6.5, color="0.35",
+        ax2.text(zc, 0.86, lab, ha="center", fontsize=7.6, color="0.35",
                  bbox=dict(fc="white", ec="none", pad=0.6))
     ax2.grid(False)
     # place z_c = 1 under the centre of panel (b); axis ends under the right edge of panel (c)
@@ -1116,8 +1116,8 @@ def fig_schematic3_v9(fname="fig_schematic3.pdf"):
     ax2.set_xlim(ZMIN, ZMAX)
     ax2.set_ylim(0, 0.95)
     ax2.set_xlabel("mean degree $z$", fontsize=7.5)
-    ax2.set_ylabel("fraction computing the\nlargest responsive\ncluster's OR", fontsize=7)
-    ax2.legend(fontsize=6, frameon=False, loc="center right")
+    ax2.set_ylabel("fraction computing the\nlargest responsive\ncluster's OR", fontsize=8)
+    ax2.legend(fontsize=7.6, frameon=False, loc="center right")
     panel(ax2, "(d)")
     fig.savefig(OUT / fname, bbox_inches="tight")
 

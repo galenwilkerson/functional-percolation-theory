@@ -39,7 +39,11 @@ def p_traj(ax, t):
     ax.plot(g.z, g.gcc, color=INK, ls=":", lw=0.9, label="giant component")
     ax.set_xlabel("$z$ (edges added)")
     ax.set_ylabel("relevance $m_i$")
-    ax.legend(fontsize=6.3, loc="center right")
+    # direct labels next to each input's jump (no legend: the jumps cross any legend position)
+    for j in range(3):
+        zj = float(g.z[g[f"m{j}"] > 0.5].min())
+        ax.text(zj + 0.08, 0.33 - 0.13 * (j % 2), f"input {j + 1}", color=COL[j], fontsize=8, ha="left", va="center")
+    ax.text(0.95, 0.42, "giant\ncomponent", color=INK, fontsize=8, ha="right", va="center")
     panel(ax, r"(a) one network, $\varphi=0.1$")
 
 
@@ -51,9 +55,11 @@ def p_atoms(ax, s):
     for _, M, _, _ in th.mixture(S, 3):
         ax.axvline(M, color="#52514e", lw=0.5, ls=":")
     ax.set_yscale("log")
+    lo, hi = ax.get_ylim()
+    ax.set_ylim(lo, hi * 40)
     ax.set_xlabel("$M_0=m_0-\\bar m$")
     ax.set_ylabel("$P(M_0)$")
-    ax.legend(fontsize=6.3)
+    ax.legend(fontsize=7.6, loc="upper center", ncol=3, columnspacing=0.8, handlelength=1.2, borderaxespad=0.2)
     panel(ax, r"(b) broken states, $z=1.5$")
 
 
@@ -80,9 +86,9 @@ def p_func_conn(ax, s):
     ax.set_xlabel("$z$")
     ax.set_ylabel("fraction of broken networks, $k=3$")
     ax.axvline(1.114, color="#52514e", lw=0.6)
-    ax.text(1.14, 1.12, r"$z_{\rm lo}$", fontsize=7, color="#52514e", va="top")
+    ax.text(1.14, 1.12, r"$z_{\rm lo}$", fontsize=8.5, color="#52514e", va="top")
     ax.set_ylim(0, 1.2)
-    ax.legend(fontsize=6.0, loc="upper right", ncol=1, borderaxespad=0.2)
+    ax.legend(fontsize=7.6, loc="upper right", ncol=1, borderaxespad=0.2)
     panel(ax, r"(c) broken by function, not connectivity")
 
 
@@ -95,7 +101,7 @@ def p_finiteh(ax):
     ax.set_ylim(1e-10, 0.3)
     ax.set_xlabel("$z$")
     ax.set_ylabel("median anisotropy $A$")
-    ax.legend(fontsize=6.3)
+    ax.legend(fontsize=7.6)
     panel(ax, r"(d) input density $h=0.002$")
 
 
@@ -112,7 +118,7 @@ def p_edge(ax, lab):
     ax.set_yscale("log")
     ax.set_xlabel("$z$")
     ax.set_ylabel("$\\chi_1=N\\langle\\Delta m_0\\rangle$")
-    ax.legend(fontsize=6.3)
+    ax.legend(fontsize=7.6)
     panel(ax, lab)
 
 
@@ -127,7 +133,7 @@ def p_fss(ax, lab):
     ax.set_yscale("log")
     ax.set_xlabel("$\\lambda_N=(z-1)N^{1/3}$")
     ax.set_ylabel("$\\langle|M_0|\\rangle N^{2/3}$")
-    ax.legend(fontsize=6.0)
+    ax.legend(fontsize=7.6)
     panel(ax, lab)
 
 
@@ -173,7 +179,7 @@ def fig_quorum_si():
     ax.axvline(1.0, color="#52514e", lw=0.6)
     ax.set_xlabel("ON inputs $c$ / predicted quorum $c^*$")
     ax.set_ylabel("P(global response)")
-    ax.legend(fontsize=6.5)
+    ax.legend(fontsize=7.6)
     panel(ax, r"past $z_{\rm hi}$: a quorum ($\varphi=0.25$, $z=4.6$)")
     F_axes[1].remove()
     fig.tight_layout()

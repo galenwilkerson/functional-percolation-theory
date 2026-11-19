@@ -21,7 +21,7 @@ OUT = Path(os.environ.get("SSB_OUT", HERE.parent / "summaries" / "ssb"))
 DATA = Path(os.environ.get("SSB_DATA", HERE.parent / "data" / "ssb"))
 ALDOUS = Path(os.environ.get("ALDOUS_CSV", HERE.parent / "summaries" / "aldous" / "aldous_moments.csv"))
 OUT.mkdir(parents=True, exist_ok=True)
-plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.right": False,
+plt.rcParams.update({"font.size": 9.5, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 7.8, "axes.spines.top": False, "axes.spines.right": False,
                      "legend.frameon": False})
 import os
 PFX = os.environ.get("SSB_PREFIX", "")              # "smoke_" to test on the smoke runs
@@ -102,7 +102,7 @@ for ax, phi in zip(axs, (0.1, 0.2, 0.25)):
     ax.set_title(f"$\\varphi={phi}$, $k=3$")
     ax.set_xlabel("$z$")
 axs[0].set_ylabel("median anisotropy $A$")
-axs[0].legend(fontsize=6)
+axs[0].legend(fontsize=7.6)
 savefig(fig, "fig_sb2_anisotropy.pdf")
 for (phi, k, N, z), g in t.groupby(["phi", "k", "N", "z"]):
     if any(np.isclose(z, v) for v in (0.5, 0.9, 1.5, 2.0, 3.0)):
@@ -135,7 +135,7 @@ for ax, k in zip(axs, (3, 4, 5)):
     ax.set_title(f"$k={k}$")
     ax.set_xlabel("$z$")
 axs[0].set_ylabel("P(broken) = P(1 $\\leq$ K $\\leq$ k-1)")
-axs[0].legend(fontsize=5)
+axs[0].legend(fontsize=7.6)
 savefig(fig, "fig_sb2_pbroken.pdf")
 pd.DataFrame(rows).to_csv(OUT / "sb2_pbroken.csv", index=False)
 
@@ -155,7 +155,7 @@ for r, phi in enumerate((0.1, 0.25)):
         ax.set_title(f"$\\varphi={phi}$, $z={z}$")
         if r == 1:
             ax.set_xlabel("$M_0$")
-axs[0, 0].legend(fontsize=5.5)
+axs[0, 0].legend(fontsize=7.6)
 axs[0, 0].set_ylabel("$P(M_0)$")
 axs[1, 0].set_ylabel("$P(M_0)$")
 savefig(fig, "fig_sb3_PM0.pdf")
@@ -225,7 +225,7 @@ for ax, k in zip(axs, (3, 4, 5)):
     ax.set_title(f"$k={k}$ ($k!={factorial(k)}$)")
     ax.set_xlabel("$z$")
 axs[0].set_ylabel("equivalent broken states $k!/|\\mathrm{Stab}|$")
-axs[0].legend(fontsize=6)
+axs[0].legend(fontsize=7.6)
 savefig(fig, "fig_sb4_orbits.pdf")
 
 # =========================================================================== SB5 onset, exponent, FSS
@@ -253,7 +253,7 @@ NN = np.array([1e3, 2.56e5])
 axs[0].loglog(NN, 0.015 * (NN / 1e3) ** (-2 / 3), "k:", lw=0.8, label="$N^{-2/3}$")
 axs[0].set_xlabel("$N$")
 axs[0].set_ylabel("$\\langle|M_0|\\rangle$ at the FP point")
-axs[0].legend(fontsize=5.5)
+axs[0].legend(fontsize=7.6)
 for phi, mk in ((0.1, "o"), (0.25, "s")):
     g = sb5[(sb5.phi == phi) & (sb5.k == 3) & (sb5.N == 64000)].sort_values("z")
     axs[1].plot(g.z, g.mean_absM0, mk + "-", ms=3, label=f"$\\varphi={phi}$, $N=64000$")
@@ -262,7 +262,7 @@ S = th.S_er(zz)
 axs[1].plot(zz, [sum(p * abs(M) for p, M, _, _ in th.mixture(x, 3)) for x in S], "k:", label="theory ($\\varphi\\to0$)")
 axs[1].set_xlabel("$z$")
 axs[1].set_ylabel("$\\langle|M_0|\\rangle$ ($k=3$)")
-axs[1].legend(fontsize=6)
+axs[1].legend(fontsize=7.6)
 savefig(fig, "fig_sb5_order_fss.pdf")
 fig, axs = plt.subplots(1, 2, figsize=(7.2, 2.5), sharey=True)
 for ax, phi in zip(axs, (0.1, 0.25)):
@@ -273,7 +273,7 @@ for ax, phi in zip(axs, (0.1, 0.25)):
     ax.set_title(f"$\\varphi={phi}$, $k=3$")
     ax.set_xlabel("$z$")
 axs[0].set_ylabel("Binder cumulant of $M_0$")
-axs[0].legend(fontsize=6)
+axs[0].legend(fontsize=7.6)
 savefig(fig, "fig_sb5_binder.pdf")
 
 # =========================================================================== SB6 extensive field
@@ -294,7 +294,7 @@ for r, phi in enumerate((0.1, 0.25)):
             ax.set_xlabel("$x=\\varepsilon N$")
 axs[0, 0].set_ylabel("$\\langle M_0\\rangle_\\varepsilon$")
 axs[1, 0].set_ylabel("$\\langle M_0\\rangle_\\varepsilon$")
-axs[0, 0].legend(fontsize=5)
+axs[0, 0].legend(fontsize=7.6)
 savefig(fig, "fig_sb6_collapse.pdf")
 for (phi, k, z, N), g in s.groupby(["phi", "k", "z", "N"]):
     S = float(th.S_er(z)[0])
@@ -322,7 +322,7 @@ for ax, phi in zip(axs, (0.1, 0.25)):
     ax.set_title(f"$\\varphi={phi}$, $k=3$, $\\varepsilon=0.01$")
     ax.set_xlabel("$z$")
 axs[0].set_ylabel("$\\langle M_0\\rangle_\\varepsilon$")
-axs[0].legend(fontsize=5.5)
+axs[0].legend(fontsize=7.6)
 savefig(fig, "fig_sb6_order_vs_z.pdf")
 
 # =========================================================================== SB6b quenched local field
@@ -350,7 +350,7 @@ axs[1].set_yscale("log")
 axs[1].set_ylabel("$\\chi=N\\langle\\Delta m_0\\rangle$")
 for ax in axs:
     ax.set_xlabel("$z$")
-axs[0].legend(fontsize=5.5)
+axs[0].legend(fontsize=7.6)
 savefig(fig, "fig_sb6b_quenched.pdf")
 for phi in (0.1, 0.25):
     for z in (0.8, 2.0):
@@ -389,7 +389,7 @@ for phi, col in ((0.1, "C0"), (0.2, "C1"), (0.25, "C3")):
 axs[0].set_xscale("log")
 axs[0].set_xlabel("$N$")
 axs[0].set_ylabel("re-selections per grown network")
-axs[0].legend(fontsize=5, ncol=2)
+axs[0].legend(fontsize=7.6, ncol=2)
 for phi, col in ((0.2, "C1"), (0.25, "C3")):
     e = ev[(ev.phi == phi) & (ev.N >= 4000)] if len(ev) else ev
     if len(e):
@@ -397,7 +397,7 @@ for phi, col in ((0.2, "C1"), (0.25, "C3")):
                     label=f"$\\varphi={phi}$")
 axs[1].set_xlabel("$z$ of re-selection")
 axs[1].set_ylabel("density")
-axs[1].legend(fontsize=6)
+axs[1].legend(fontsize=7.6)
 savefig(fig, "fig_sb7_reselection.pdf")
 
 # =========================================================================== trajectories + function space
@@ -415,7 +415,7 @@ for r, phi in enumerate((0.1, 0.25)):
             ax.set_ylabel("$m_i$")
         if r == 1:
             ax.set_xlabel("$z$ (edges added)")
-axs[0, 0].legend(fontsize=6)
+axs[0, 0].legend(fontsize=7.6)
 savefig(fig, "fig_traj.pdf")
 rows = []
 for (phi, k, N), g in t.groupby(["phi", "k", "N"]):
