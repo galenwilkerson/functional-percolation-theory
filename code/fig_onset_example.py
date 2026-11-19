@@ -247,11 +247,11 @@ def main():
     fig = plt.figure(figsize=(7.0, 5.0))
     gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 0.26, 1.0], hspace=0.42, wspace=0.12)
     ga, gb = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
-    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion ($\\varphi=0.1$), $z={Z}$\nevery connected node responds to $A$ or $B$",
+    draw_graph(ga, G, inputs, mc_a, f"(a) simple contagion, $z={Z}$\nconnectivity is sufficient",
                ring=inputs[:2],
                sym="$A$ and $B$ both control the giant cascade (gold boxes)\n"
                    "swapping $A\\leftrightarrow B$ changes nothing: symmetric")
-    draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nonly $A$ controls; $B$ is connected but inert",
+    draw_graph(gb, G, inputs, mc_b, f"(b) $\\varphi=0.25$, same graph\nconnectivity is not sufficient",
                ring=inputs[:1],
                sym="only $A$ controls the giant cascade (gold box)\n"
                    "swapping $A\\leftrightarrow B$ changes the function: broken")
@@ -271,9 +271,9 @@ def main():
         ax.legend(handles=h, loc="upper center", bbox_to_anchor=(0.5, 1.0), ncol=4, fontsize=7.4, frameon=False, handletextpad=0.3,
                   columnspacing=0.7, borderaxespad=0, handlelength=1.2)
     key(fig.add_subplot(gs[1, :]), [
-        ("node", C_AB, r"responds to $A$ or $B$ ($x_A\vee x_B$)"),
+        ("node", C_AB, r"responds to $A$ or $B$ (OR, $x_A\vee x_B$)"),
         ("node", C_OR, r"responds to $A$ only ($x_A$)"),
-        ("node", C_NON, r"needs $A$ and $B$ ($x_A\wedge x_B$)"),
+        ("node", C_NON, r"needs $A$ and $B$ (non-OR, $x_A\wedge x_B$)"),
         ("node", C_ZERO, "never responds"),
         ("input", INK, "input"),
         ("box", C_RING, "controls the giant cascade"),
